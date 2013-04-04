@@ -10,6 +10,7 @@
 #include "Serialize.h"
 
 #define kCCBXBitBufferSize 8
+#define kCCBXVersion 4
 
 typedef enum { false, true } bool;
 
@@ -119,12 +120,14 @@ void writeInt(int value, bool sign, FILE *outputFile)
 
     length = log2(number);
 
+    // Write number of bits used
     for (i = 0; i < length; i++)
     {
         putBit(false);
     }
     putBit(true);
 
+    // Write out the actual number
     for (i = length - 1; i >= 0; i--)
     {
         if (number & 1 << i)
@@ -137,6 +140,22 @@ void writeInt(int value, bool sign, FILE *outputFile)
         }
     }
     flushBits(outputFile);
+}
+
+void writeBool(bool b, FILE *outputFile)
+{
+    unsigned char bytes[1];
+
+    if (b)
+    {
+        bytes[0] = 1;
+    }
+    else
+    {
+        bytes[0] = 0;
+    }
+
+    fwrite(bytes, sizeof(char), 1, outputFile);
 }
 
 /*****************************************************************************
@@ -181,12 +200,15 @@ JSBool writeHeader(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv,
 
     outputFile = (FILE *)argv[0];
 
+    // Write magic header string
     rewind(outputFile);
     fwrite(header, sizeof(char), 4, outputFile);
 
-    writeInt(4, false, outputFile);
+    // Write version number
+    writeInt(kCCBXVersion, false, outputFile);
 
-    // TODO: Append isJSControlled? boolean.
+    // Write javascript control status
+    writeBool(false, outputFile);
 
     if (outputFile != NULL)
     {
@@ -197,21 +219,6 @@ JSBool writeHeader(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv,
     {
         return JS_FALSE;
     }
-}
-
-JSBool writeStringCache(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
-{
-    // TODO: Implement this.
-}
-
-JSBool writeSequences(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
-{
-    // TODO: Implement this.
-}
-
-JSBool writeNodeGraph(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
-{
-    // TODO: Implement this.
 }
 
 JSBool closeFile(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
@@ -235,34 +242,6 @@ JSBool closeFile(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, j
     }
 }
 
-// A sample function
-// Every implementation of a Javascript function must have this signature
-JSBool computeSum(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
-{
-	long a, b, sum;
-
-	// Make sure the right number of arguments were passed in
-	if (argc != 2)
-    {
-		return JS_FALSE;
-    }
-
-	// Convert the two arguments from jsvals to longs
-	if (JS_ValueToInteger(cx, argv[0], &a) == JS_FALSE || JS_ValueToInteger(cx, argv[1], &b) == JS_FALSE)
-    {
-		return JS_FALSE;
-    }
-
-	// Perform the actual work
-	sum = a + b;
-
-	// Package the return value as a jsval
-	*rval = JS_IntegerToValue(sum);
-
-	// Indicate success
-	return JS_TRUE;
-}
-
 // MM_STATE is a macro that expands to some definitions that are
 // needed in order interact with Flash.  This macro must be
 // defined exactly once in your library
@@ -273,13 +252,7 @@ void MM_Init()
 {
     JS_DefineFunction(_T("openFile"), openFile, 0);
     JS_DefineFunction(_T("writeHeader"), writeHeader, 1);
-    JS_DefineFunction(_T("writeStringCache"), writeStringCache, 1);
-    JS_DefineFunction(_T("writeSequences"), writeSequences, 1);
-    JS_DefineFunction(_T("writeNodeGraph"), writeNodeGraph, 1);
     JS_DefineFunction(_T("closeFile"), closeFile, 1);
-
-	// sample function
-	JS_DefineFunction(_T("computeSum"),	computeSum,	2);
 }
 
 void MM_Terminate()
