@@ -4,15 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <TChar.h>
 #include "mm_jsapi.h"
 
 #include "Serialize.h"
 
 #define kCCBXBitBufferSize 8
-#define kCCBXVersion 4
-
-typedef enum { false, true } bool;
 
 static char bitBuffer[kCCBXBitBufferSize];
 static int currentBit;
@@ -52,7 +50,7 @@ int log2(uint64_t val)
     return log;
 }
 
-void putBit(bool b)
+void putBit(JSBool b)
 {
     if (b)
     {
@@ -87,7 +85,7 @@ void flushBits(FILE *outputFile)
     fwrite(bitBuffer, sizeof(char), numBytes, outputFile);
 }
 
-void writeInt(int value, bool sign, FILE *outputFile)
+void _writeInt(int value, JSBool sign, FILE *outputFile)
 {
     uint64_t number;
     int length;
@@ -123,39 +121,50 @@ void writeInt(int value, bool sign, FILE *outputFile)
     // Write number of bits used
     for (i = 0; i < length; i++)
     {
-        putBit(false);
+        putBit(JS_FALSE);
     }
-    putBit(true);
+    putBit(JS_TRUE);
 
     // Write out the actual number
     for (i = length - 1; i >= 0; i--)
     {
-        if (number & 1 << i)
+        if (number & 1i64 << i)
         {
-            putBit(true);
+            putBit(JS_TRUE);
         }
         else
         {
-            putBit(false);
+            putBit(JS_FALSE);
         }
     }
     flushBits(outputFile);
 }
 
-void writeBool(bool b, FILE *outputFile)
+void _writeBool(JSBool b, FILE *outputFile)
 {
-    unsigned char bytes[1];
+    fputc(b ? 1 : 0, outputFile);
+}
 
-    if (b)
-    {
-        bytes[0] = 1;
-    }
-    else
-    {
-        bytes[0] = 0;
-    }
+void _writeByte(unsigned char character, FILE *outputFile)
+{
+    fputc(character, outputFile);
+}
 
-    fwrite(bytes, sizeof(char), 1, outputFile);
+void _writeString(char *string, FILE *outputFile)
+{
+    size_t length = strlen(string);
+
+    assert(length <= 0xFFFF);
+
+    fputc((length >> 8) & 0xFF, outputFile);
+    fputc(length & 0xFF, outputFile);
+
+    fwrite(string, sizeof(char), length, outputFile);
+}
+
+FILE *JS_ValueToFile(jsval val)
+{
+    return (FILE *)val;
 }
 
 /*****************************************************************************
@@ -165,7 +174,6 @@ void writeBool(bool b, FILE *outputFile)
 JSBool openFile(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
 {
     FILE *outputFile;
-    unsigned int stringLength;
     char *filename;
 
     if (argc != 1)
@@ -176,39 +184,6 @@ JSBool openFile(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, js
     filename = allocJSString(cx, argv[0]);
     outputFile = fopen(filename, "wb");
     free(filename);
-
-    if (outputFile != NULL)
-    {
-        *rval = JS_ObjectToValue(outputFile);
-        return JS_TRUE;
-    }
-    else
-    {
-        return JS_FALSE;
-    }
-}
-
-JSBool writeHeader(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
-{
-    FILE *outputFile;
-    char header[4] = {'i', 'b', 'c', 'c'};
-
-    if (argc != 1)
-    {
-		return JS_FALSE;
-    }
-
-    outputFile = (FILE *)argv[0];
-
-    // Write magic header string
-    rewind(outputFile);
-    fwrite(header, sizeof(char), 4, outputFile);
-
-    // Write version number
-    writeInt(kCCBXVersion, false, outputFile);
-
-    // Write javascript control status
-    writeBool(false, outputFile);
 
     if (outputFile != NULL)
     {
@@ -242,6 +217,133 @@ JSBool closeFile(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, j
     }
 }
 
+JSBool writeFloat(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
+{
+    // TODO: Implement this
+
+    return JS_TRUE;
+}
+
+JSBool writeInt(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
+{
+    FILE *outputFile;
+    long value;
+
+    if (argc != 2)
+    {
+        return JS_FALSE;
+    }
+
+    outputFile = JS_ValueToFile(argv[1]);
+    if (outputFile != NULL)
+    {
+        if (JS_ValueToInteger(cx, argv[0], &value) == JS_TRUE)
+        {
+            _writeInt(value, JS_TRUE, outputFile);
+            return JS_TRUE;
+        }
+    }
+
+    // Should not get here...
+    return JS_FALSE;
+}
+
+JSBool writeUInt(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
+{
+    FILE *outputFile;
+    long value;
+
+    if (argc != 2)
+    {
+        return JS_FALSE;
+    }
+
+    outputFile = JS_ValueToFile(argv[1]);
+    if (outputFile != NULL)
+    {
+        if (JS_ValueToInteger(cx, argv[0], &value) == JS_TRUE)
+        {
+            _writeInt(value, JS_FALSE, outputFile);
+            return JS_TRUE;
+        }
+    }
+
+    // Should not get here...
+    return JS_FALSE;
+}
+
+JSBool writeBool(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
+{
+    FILE *outputFile;
+    JSBool value;
+
+    if (argc != 2)
+    {
+        return JS_FALSE;
+    }
+
+    outputFile = JS_ValueToFile(argv[1]);
+    if (outputFile != NULL)
+    {
+        if (JS_ValueToBoolean(cx, argv[0], &value) == JS_TRUE)
+        {
+            _writeBool(value, outputFile);
+            return JS_TRUE;
+        }
+    }
+
+    // Should not get here...
+    return JS_FALSE;
+}
+
+JSBool writeByte(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
+{
+    FILE *outputFile;
+    long value;
+
+    if (argc != 2)
+    {
+        return JS_FALSE;
+    }
+
+    outputFile = JS_ValueToFile(argv[1]);
+    if (outputFile != NULL)
+    {
+        if (JS_ValueToInteger(cx, argv[0], &value) == JS_TRUE)
+        {
+            _writeByte((unsigned char)value, outputFile);
+            return JS_TRUE;
+        }
+    }
+
+    // Should not get here...
+    return JS_FALSE;
+}
+
+JSBool writeString(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
+{
+    FILE *outputFile;
+    char *value;
+
+    if (argc != 2)
+    {
+        return JS_FALSE;
+    }
+
+    outputFile = JS_ValueToFile(argv[1]);
+    if (outputFile != NULL)
+    {
+        value = allocJSString(cx, argv[0]);
+        _writeString(value, outputFile);
+        free(value);
+        return JS_TRUE;
+    }
+    else
+    {
+        return JS_FALSE;
+    }
+}
+
 // MM_STATE is a macro that expands to some definitions that are
 // needed in order interact with Flash.  This macro must be
 // defined exactly once in your library
@@ -251,8 +353,13 @@ MM_STATE
 void MM_Init()
 {
     JS_DefineFunction(_T("openFile"), openFile, 0);
-    JS_DefineFunction(_T("writeHeader"), writeHeader, 1);
     JS_DefineFunction(_T("closeFile"), closeFile, 1);
+    JS_DefineFunction(_T("writeFloat"), writeFloat, 2);
+    JS_DefineFunction(_T("writeInt"), writeInt, 2);
+    JS_DefineFunction(_T("writeUInt"), writeUInt, 2);
+    JS_DefineFunction(_T("writeBool"), writeBool, 2);
+    JS_DefineFunction(_T("writeByte"), writeByte, 2);
+    JS_DefineFunction(_T("writeString"), writeString, 2);
 }
 
 void MM_Terminate()
