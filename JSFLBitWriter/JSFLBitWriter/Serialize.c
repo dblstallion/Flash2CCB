@@ -12,6 +12,15 @@
 
 #define kCCBXBitBufferSize 8
 
+enum {
+    kCCBXFloat0 = 0,
+    kCCBXFloat1,
+    kCCBXFloatMinus1,
+    kCCBXFloat05,
+    kCCBXFloatInteger,
+    kCCBXFloatFull
+};
+
 static char bitBuffer[kCCBXBitBufferSize];
 static int currentBit;
 static int currentByte;
@@ -150,6 +159,47 @@ void _writeByte(unsigned char character, FILE *outputFile)
     fputc(character, outputFile);
 }
 
+void _writeFloat(float value, FILE *outputFile)
+{
+    unsigned char type;
+
+    if (value == 0.0f)
+    {
+        type = kCCBXFloat0;
+    }
+    else if (value == 1.0f)
+    {
+        type = kCCBXFloat1;
+    }
+    else if (value = -1.0f)
+    {
+        type = kCCBXFloatMinus1;
+    }
+    else if (value == 0.5f)
+    {
+        type = kCCBXFloat05;
+    }
+    else if ((float)((int)value) == value)
+    {
+        type = kCCBXFloatInteger;
+    }
+    else
+    {
+        type = kCCBXFloatFull;
+    }
+
+    _writeByte(type, outputFile);
+
+    if (type == kCCBXFloatInteger)
+    {
+        _writeInt((int)value, JS_TRUE, outputFile);
+    }
+    else if (type == kCCBXFloatFull)
+    {
+        fwrite(&value, sizeof(float), 1, outputFile);
+    }
+}
+
 void _writeString(char *string, FILE *outputFile)
 {
     size_t length = strlen(string);
@@ -219,9 +269,26 @@ JSBool closeFile(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, j
 
 JSBool writeFloat(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
 {
-    // TODO: Implement this
+    FILE *outputFile;
+    double value;
 
-    return JS_TRUE;
+    if (argc != 2)
+    {
+        return JS_FALSE;
+    }
+
+    outputFile = JS_ValueToFile(argv[1]);
+    if (outputFile != NULL)
+    {
+        if (JS_ValueToDouble(cx, argv[0], &value) == JS_TRUE)
+        {
+            _writeFloat((float)value, outputFile);
+            return JS_TRUE;
+        }
+    }
+
+    // Should not get here...
+    return JS_FALSE;
 }
 
 JSBool writeInt(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, jsval *rval)
