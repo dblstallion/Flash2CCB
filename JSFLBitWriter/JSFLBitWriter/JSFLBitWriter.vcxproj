@@ -58,8 +58,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)..\Flash2CCBi.jsfl" "$(LOCALAPPDATA)\Adobe\Flash CS6\en_US\Configuration\Commands" /Y;
-copy "$(TargetPath)" "$(LOCALAPPDATA)\Adobe\Flash CS6\en_US\Configuration\External Libraries" /Y;</Command>
+      <Command>copy "$(TargetPath)" "$(LOCALAPPDATA)\Adobe\Flash CS6\en_US\Configuration\External Libraries" /Y;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -81,8 +80,7 @@ copy "$(TargetPath)" "$(LOCALAPPDATA)\Adobe\Flash CS6\en_US\Configuration\Extern
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)..\Flash2CCBi.jsfl" "$(LOCALAPPDATA)\Adobe\Flash CS6\en_US\Configuration\Commands" /Y;
-copy "$(TargetPath)" "$(LOCALAPPDATA)\Adobe\Flash CS6\en_US\Configuration\External Libraries" /Y;</Command>
+      <Command>copy "$(TargetPath)" "$(LOCALAPPDATA)\Adobe\Flash CS6\en_US\Configuration\External Libraries" /Y;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
