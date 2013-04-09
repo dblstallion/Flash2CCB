@@ -171,7 +171,7 @@ void _writeFloat(float value, FILE *outputFile)
     {
         type = kCCBXFloat1;
     }
-    else if (value = -1.0f)
+    else if (value == -1.0f)
     {
         type = kCCBXFloatMinus1;
     }
