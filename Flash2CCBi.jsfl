@@ -1,12 +1,4 @@
-﻿var kCCBXVersion = 4;
-
-var jsControlled = false;
-var flattenPaths = false;
-
-var stringCache = {};
-var nextStringId = 0;
-
-function count(obj)
+﻿function count(obj)
 {
 	var count = 0;
 	for (var i in obj)
@@ -16,83 +8,135 @@ function count(obj)
 	return count;
 }
 
-function writeHeader(outputFile)
+function CCBINode()
 {
-    JSFLBitWriter.writeByte("i".charCodeAt(0), outputFile);
-    JSFLBitWriter.writeByte("b".charCodeAt(0), outputFile);
-    JSFLBitWriter.writeByte("c".charCodeAt(0), outputFile);
-    JSFLBitWriter.writeByte("c".charCodeAt(0), outputFile);
-    JSFLBitWriter.writeUInt(kCCBXVersion, outputFile);
-    JSFLBitWriter.writeBool(jsControlled, outputFile);
+	return {
+		class: "CCNode",
+		jsController: null,
+		memberVarAssignmentType: 0,
+		memberVarAssignmentName: null,
+		sequences: [],
+		regularProperties: [],
+		extraProperties: [],
+		children: []
+	};
 }
 
-function addToStringCache(string, isPath)
+function CCBI()
 {
-	if (isPath && flattenPaths)
-	{
-		string = string.replace(/^.*[\\\/]/, '');
-	}
-	
-	if (string in stringCache)
-	{
-		return stringCache[string];
-	}
-	else
-	{
-		var stringId = nextStringId;
-		nextStringId = nextStringId + 1;
+	return {
+		version: 4,
+		jsControlled: false,
+		flattenPaths: false,
+		stringCache: {},
+		nextStringId: 0,
 		
-		stringCache[string] = stringId;
-	
-		return stringId;
-	}
-}
+		writeHeader: function(outputFile) {
+			JSFLBitWriter.writeByte("i".charCodeAt(0), outputFile);
+			JSFLBitWriter.writeByte("b".charCodeAt(0), outputFile);
+			JSFLBitWriter.writeByte("c".charCodeAt(0), outputFile);
+			JSFLBitWriter.writeByte("c".charCodeAt(0), outputFile);
+			JSFLBitWriter.writeUInt(this.version, outputFile);
+			JSFLBitWriter.writeBool(this.jsControlled, outputFile);
+		},
+		
+		addToStringCache: function(string, isPath)
+		{
+			if (isPath && this.flattenPaths)
+			{
+				string = string.replace(/^.*[\\\/]/, '');
+			}
+			
+			if (string in this.stringCache)
+			{
+				return this.stringCache[string];
+			}
+			else
+			{
+				var stringId = this.nextStringId;
+				this.nextStringId = this.nextStringId + 1;
+				
+				this.stringCache[string] = stringId;
+			
+				return stringId;
+			}
+		},
+		
+		writeString: function(string, isPath, outputFile)
+		{
+			JSFLBitWriter.writeUInt(this.addToStringCache(string, isPath), outputFile);
+		},
+		
+		writeStringCache: function(outputFile)
+		{
+			var size = count(this.stringCache);
+			
+			JSFLBitWriter.writeUInt(size, outputFile);
+			
+			for (var str in this.stringCache)
+			{
+				JSFLBitWriter.writeString(str, outputFile);
+			}
+		},
+		
+		writeSequences: function(outputFile)
+		{
+			// TODO: Implement this
+			JSFLBitWriter.writeUInt(0, outputFile);
+		},
+		
+		writeNode: function(node, outputFile)
+		{
+			this.writeString(node.class, false, outputFile);
+			
+			if(this.jsControlled)
+			{
+				this.writeString(node.jsController, false, outputFile);
+			}
+			
+			JSFLBitWriter.writeUInt(node.memberVarAssignmentType, outputFile);
+			if(node.memberVarAssignmentType != 0)
+			{
+				this.writeString(node.memberVarAssignmentName, false, outputFile);
+			}
+			
+			// TODO: Sequences
+			JSFLBitWriter.writeUInt(0, outputFile);
+			
+			JSFLBitWriter.writeUInt(node.regularProperties.length, outputFile);
+			JSFLBitWriter.writeUInt(node.extraProperties.length, outputFile);
+			
+			// TODO: serialize properties
+			
+			JSFLBitWriter.writeUInt(node.children.length);
+			for(var i; i < node.children.length; i++)
+			{
+				writeNode(node.children[i], outputFile);
+			}
+		},
 
-function writeString(string, isPath, outputFile)
-{
-	JSFLBitWriter.writeUInt(addToStringCache(string, isPath), outputFile);
-}
-
-function writeStringCache(outputFile)
-{
-	var size = count(stringCache);
-	
-	JSFLBitWriter.writeUInt(size, outputFile);
-	
-	for (var str in stringCache)
-	{
-		JSFLBitWriter.writeString(str, outputFile);
-	}
-}
-
-function writeSequences(outputFile)
-{
-    // TODO: Implement this
-	JSFLBitWriter.writeUInt(0, outputFile);
-}
-
-function writeNodeGraph(outputFile)
-{
-    // TODO: Implement this
+		writeNodeGraph: function(outputFile)
+		{
+			// TODO: Implement this
+		},
+		
+		write: function (filename) {
+			var outputFile = JSFLBitWriter.openFile(filename); // Set full filepath here.
+			
+			this.writeHeader(outputFile);
+			this.writeStringCache(outputFile);
+			this.writeSequences(outputFile);
+			this.writeNodeGraph(outputFile);
+			
+			JSFLBitWriter.closeFile(outputFile);
+		}
+	};
 }
 
 fl.trace("Working...");
 
-// Test
-addToStringCache("TestString1");
-addToStringCache("StringTest2");
-
-var outputFile = JSFLBitWriter.openFile("test.ccbi"); // Set full filepath here.
-writeHeader(outputFile);
-writeStringCache(outputFile);
-writeSequences(outputFile);
-writeNodeGraph(outputFile);
-
-// Test
-writeString("TestString1", false, outputFile);
-writeString("StringTest2", false, outputFile);
-writeString("TestString1", false, outputFile);
-
-JSFLBitWriter.closeFile(outputFile);
+var ccbi = CCBI();
+fl.trace("Write...");
+ccbi.write('C:\\Users\\Daniel\\Downloads\\test.ccbi');
 
 fl.trace("Done!");
