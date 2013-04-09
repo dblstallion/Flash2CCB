@@ -1,0 +1,3 @@
+[submodule "xJSFL"]
+	path = xJSFL
+	url = git://github.com/davestewart/xJSFL.git
