@@ -8,6 +8,49 @@
 	return count;
 }
 
+var CCBIProperty =
+{
+	Position: function(name, x, y, positionType)
+	{
+		return {
+			propertyName: name,
+			platform: 0,
+			typeID: 0,
+			cacheStrings: function(ccbi)
+			{
+				ccbi.addToStringCache(this.propertyName, false);
+			},
+			serialize: function(ccbi, outputFile)
+			{
+				JSFLBitWriter.writeFloat(x, outputFile);
+				JSFLBitWriter.writeFloat(y, outputFile);
+				JSFLBitWriter.writeUInt(positionType, outputFile);
+			}
+		};
+	},
+	Point: 2,
+	PointLock: 3,
+	Size: 1,
+	ScaleLock: 4,
+	Flip: 15,
+	Float: 7,
+	Degrees: 5,
+	FloatVar: 8,
+	Integer: 6,
+	IntegerLabeled: 20,
+	Byte: 12,
+	Check: 9,
+	Text: 18,
+	SpriteFrame: 10,
+	Texture: 11,
+	FntFile: 17,
+	FontTTF: 19,
+	Color3: 13,
+	Color4FVar: 14,
+	Blendmode: 16,
+	Block: 21
+}
+
 function CCBINode()
 {
 	return {
@@ -32,7 +75,8 @@ function CCBI(inJsControlled, inFlattenPaths)
 		nextStringId: 1,
 		rootNode: null,
 		
-		writeHeader: function(outputFile) {
+		writeHeader: function(outputFile)
+		{
 			JSFLBitWriter.writeByte("i".charCodeAt(0), outputFile);
 			JSFLBitWriter.writeByte("b".charCodeAt(0), outputFile);
 			JSFLBitWriter.writeByte("c".charCodeAt(0), outputFile);
@@ -103,6 +147,24 @@ function CCBI(inJsControlled, inFlattenPaths)
 			{
 				this.addNodeToStringCache(node.children[i]);
 			}
+			
+			for(var i = 0; i < node.regularProperties.length; i++)
+			{
+				node.regularProperties[i].cacheStrings(this);
+			}
+			
+			for(var i = 0; i < node.extraProperties.length; i++)
+			{
+				node.extraProperties[i].cacheStrings(this);
+			}
+		},
+		
+		writeProperty: function(property, outputFile)
+		{
+			JSFLBitWriter.writeUInt(property.typeID, outputFile);
+			this.writeString(property.propertyName, false, outputFile);
+			JSFLBitWriter.writeByte(property.platform, outputFile);
+			property.serialize(this, outputFile)
 		},
 		
 		writeNode: function(node, outputFile)
@@ -126,7 +188,15 @@ function CCBI(inJsControlled, inFlattenPaths)
 			JSFLBitWriter.writeUInt(node.regularProperties.length, outputFile);
 			JSFLBitWriter.writeUInt(node.extraProperties.length, outputFile);
 			
-			// TODO: serialize properties
+			for(var i = 0; i < node.regularProperties.length; i++)
+			{
+				this.writeProperty(node.regularProperties[i], outputFile);
+			}
+			
+			for(var i = 0; i < node.extraProperties.length; i++)
+			{
+				this.writeProperty(node.extraProperties[i], outputFile);
+			}
 			
 			JSFLBitWriter.writeUInt(node.children.length, outputFile);
 			for(var i = 0; i < node.children.length; i++)
@@ -140,7 +210,8 @@ function CCBI(inJsControlled, inFlattenPaths)
 			this.writeNode(this.rootNode, outputFile);
 		},
 		
-		write: function (filename) {
+		write: function (filename)
+		{
 			
 			this.addNodeToStringCache(this.rootNode);
 			
@@ -160,7 +231,11 @@ fl.trace("Working...");
 
 var ccbi = CCBI(false, false);
 
-ccbi.rootNode = CCBINode();
+var root = CCBINode();
+
+root.regularProperties.push(CCBIProperty.Position("Pos", 0.5, 2.0, 1));
+
+ccbi.rootNode = root;
 
 fl.trace("Write...");
 ccbi.write('C:\\Users\\Daniel\\Downloads\\test.ccbi');
