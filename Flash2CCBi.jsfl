@@ -22,14 +22,15 @@ function CCBINode()
 	};
 }
 
-function CCBI()
+function CCBI(inJsControlled, inFlattenPaths)
 {
 	return {
 		version: 4,
-		jsControlled: false,
-		flattenPaths: false,
+		jsControlled: inJsControlled,
+		flattenPaths: inFlattenPaths,
 		stringCache: {},
-		nextStringId: 0,
+		nextStringId: 1,
+		rootNode: null,
 		
 		writeHeader: function(outputFile) {
 			JSFLBitWriter.writeByte("i".charCodeAt(0), outputFile);
@@ -85,6 +86,25 @@ function CCBI()
 			JSFLBitWriter.writeUInt(0, outputFile);
 		},
 		
+		addNodeToStringCache: function(node)
+		{
+			this.addToStringCache(node.class, false);
+			if(this.jsControlled)
+			{
+				this.addToStringCache(node.jsController, false);
+			}
+			
+			if(node.memberVarAssignmentType != 0)
+			{
+				this.addToStringCache(node.memberVarAssignmentName, false);
+			}
+			
+			for(var i; i < node.children.length; i++)
+			{
+				this.addNodeToStringCache(node.children[i]);
+			}
+		},
+		
 		writeNode: function(node, outputFile)
 		{
 			this.writeString(node.class, false, outputFile);
@@ -108,19 +128,22 @@ function CCBI()
 			
 			// TODO: serialize properties
 			
-			JSFLBitWriter.writeUInt(node.children.length);
-			for(var i; i < node.children.length; i++)
+			JSFLBitWriter.writeUInt(node.children.length, outputFile);
+			for(var i = 0; i < node.children.length; i++)
 			{
-				writeNode(node.children[i], outputFile);
+				this.writeNode(node.children[i], outputFile);
 			}
 		},
 
 		writeNodeGraph: function(outputFile)
 		{
-			// TODO: Implement this
+			this.writeNode(this.rootNode, outputFile);
 		},
 		
 		write: function (filename) {
+			
+			this.addNodeToStringCache(this.rootNode);
+			
 			var outputFile = JSFLBitWriter.openFile(filename); // Set full filepath here.
 			
 			this.writeHeader(outputFile);
@@ -135,7 +158,10 @@ function CCBI()
 
 fl.trace("Working...");
 
-var ccbi = CCBI();
+var ccbi = CCBI(false, false);
+
+ccbi.rootNode = CCBINode();
+
 fl.trace("Write...");
 ccbi.write('C:\\Users\\Daniel\\Downloads\\test.ccbi');
 
