@@ -483,11 +483,6 @@ function CCBI(inJsControlled, inFlattenPaths)
 				this.addToStringCache(node.memberVarAssignmentName, false);
 			}
 			
-			for(var i; i < node.children.length; i++)
-			{
-				this.addNodeToStringCache(node.children[i]);
-			}
-			
 			for(var i = 0; i < node.regularProperties.length; i++)
 			{
 				node.regularProperties[i].cacheStrings(this);
@@ -496,6 +491,11 @@ function CCBI(inJsControlled, inFlattenPaths)
 			for(var i = 0; i < node.extraProperties.length; i++)
 			{
 				node.extraProperties[i].cacheStrings(this);
+			}
+			
+			for(var i = 0; i < node.children.length; i++)
+			{
+				this.addNodeToStringCache(node.children[i]);
 			}
 		},
 		
@@ -567,35 +567,44 @@ function CCBI(inJsControlled, inFlattenPaths)
 	};
 }
 
+function elementToNode(element)
+{
+	var node = CCBINode();
+	
+	node.class = "CCSprite";
+	node.regularProperties.push(CCBIProperty.Position("position", element.x, element.y, 1));
+	node.regularProperties.push(CCBIProperty.Size("contentSize", element.width, element.height));
+	node.regularProperties.push(CCBIProperty.Point("anchorPoint", 0, 1));
+	node.regularProperties.push(CCBIProperty.ScaleLock("scale", element.scaleX, element.scaleY));
+	node.regularProperties.push(CCBIProperty.Degrees("rotation", element.rotation));
+	node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", "Animations/chicken_animations.plist", "chicken_move_B.swf/0002"));
+	
+	return node;
+}
+
+function layerToNode(layer)
+{
+	var node = CCBINode();
+	
+	node.class = "CCLayer";
+	node.regularProperties.push(CCBIProperty.Point("anchorPoint", 0, 1));
+	
+	for(var elementIndex in layer.frames[0].elements)
+	{
+		var element = layer.frames[0].elements[elementIndex];
+		
+		fl.trace("Adding sprite");
+		node.children.push(elementToNode(element));
+	}
+	
+	return node;
+}
+
 fl.trace("Working...");
 
 var ccbi = CCBI(false, false);
 
-var root = CCBINode();
-
-root.regularProperties.push(CCBIProperty.Position("Position", 0.5, 2.0, 1));
-root.regularProperties.push(CCBIProperty.Blendmode("Blend", 1, 0));
-root.regularProperties.push(CCBIProperty.Block("Block", "Selector", 1));
-root.regularProperties.push(CCBIProperty.Byte("Byte", 42));
-root.regularProperties.push(CCBIProperty.Check("Bool", true));
-root.regularProperties.push(CCBIProperty.Color3("Color", 255, 128, 42));
-root.regularProperties.push(CCBIProperty.Color4FVar("ColorVar", 1.0, 0.5, 0.0, 1.0, 0.25, 0.35, 0.1, 0.25));
-root.regularProperties.push(CCBIProperty.Degrees("Degrees", 90.0));
-root.regularProperties.push(CCBIProperty.Flip("Mirror", true, false));
-root.regularProperties.push(CCBIProperty.Float("Float", 128.88));
-root.regularProperties.push(CCBIProperty.FloatVar("FloatVar", 1.0, 128.0));
-root.regularProperties.push(CCBIProperty.FntFile("FontFile", "abc.fnt"));
-root.regularProperties.push(CCBIProperty.FontTTF("TTFFile", "Helvetica"));
-root.regularProperties.push(CCBIProperty.Integer("An int", -128));
-root.regularProperties.push(CCBIProperty.IntegerLabeled("LabeledInt", 1264));
-root.regularProperties.push(CCBIProperty.Point("Point", 0.5, 23.123));
-root.regularProperties.push(CCBIProperty.PointLock("PointLock", 1298.0, 128.28));
-root.regularProperties.push(CCBIProperty.Position("Position", 129, 128, 2));
-root.regularProperties.push(CCBIProperty.ScaleLock("Scale Lock", 1928, 1));
-root.regularProperties.push(CCBIProperty.Size("Size", 640, 480));
-root.regularProperties.push(CCBIProperty.SpriteFrame("SpriteFrame", "something.plist", "file.png"));
-root.regularProperties.push(CCBIProperty.Text("Text", "Some text, la di da"));
-root.regularProperties.push(CCBIProperty.Texture("Texture", "myFace.png"));
+var root = layerToNode(fl.getDocumentDOM().getTimeline().layers[0]);
 
 ccbi.rootNode = root;
 
