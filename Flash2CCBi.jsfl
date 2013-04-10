@@ -62,7 +62,7 @@ var CCBIProperty =
 			}
 		};
 	},
-	Size: function(name, width, height)
+	Size: function(name, width, height, sizeType)
 	{
 		return {
 			propertyName: name,
@@ -76,10 +76,11 @@ var CCBIProperty =
 			{
 				JSFLBitWriter.writeFloat(width, outputFile);
 				JSFLBitWriter.writeFloat(height, outputFile);
+				JSFLBitWriter.writeUInt(sizeType, outputFile);
 			}
 		};
 	},
-	ScaleLock: function(name, x, y)
+	ScaleLock: function(name, x, y, scaleType)
 	{
 		return {
 			propertyName: name,
@@ -93,6 +94,7 @@ var CCBIProperty =
 			{
 				JSFLBitWriter.writeFloat(x, outputFile);
 				JSFLBitWriter.writeFloat(y, outputFile);
+				JSFLBitWriter.writeUInt(scaleType, outputFile);
 			}
 		};
 	},
@@ -253,12 +255,12 @@ var CCBIProperty =
 			{
 				ccbi.addToStringCache(this.propertyName, false);
 				ccbi.addToStringCache(spriteSheetFile, true);
-				ccbi.addToStringCache(spriteFile, true);
+				ccbi.addToStringCache(spriteFile, false);
 			},
 			serialize: function(ccbi, outputFile)
 			{
 				ccbi.writeString(spriteSheetFile, true, outputFile);
-				ccbi.writeString(spriteFile, true, outputFile);
+				ccbi.writeString(spriteFile, false, outputFile);
 			}
 		};
 	},
@@ -408,11 +410,12 @@ function CCBINode()
 function CCBI(inJsControlled, inFlattenPaths)
 {
 	return {
-		version: 4,
+		version: 5,
 		jsControlled: inJsControlled,
 		flattenPaths: inFlattenPaths,
 		stringCache: {},
-		nextStringId: 1,
+		nextStringId: 0,
+		sequenceAutoPlay: -1,
 		rootNode: null,
 		
 		writeHeader: function(outputFile)
@@ -468,6 +471,8 @@ function CCBI(inJsControlled, inFlattenPaths)
 		{
 			// TODO: Implement this
 			JSFLBitWriter.writeUInt(0, outputFile);
+			
+			JSFLBitWriter.writeInt(this.sequenceAutoPlay, outputFile);
 		},
 		
 		addNodeToStringCache: function(node)
@@ -573,9 +578,9 @@ function elementToNode(element)
 	
 	node.class = "CCSprite";
 	node.regularProperties.push(CCBIProperty.Position("position", element.x, element.y, 1));
-	node.regularProperties.push(CCBIProperty.Size("contentSize", element.width, element.height));
+	node.regularProperties.push(CCBIProperty.Size("contentSize", element.width, element.height, 0));
 	node.regularProperties.push(CCBIProperty.Point("anchorPoint", 0, 1));
-	node.regularProperties.push(CCBIProperty.ScaleLock("scale", element.scaleX, element.scaleY));
+	node.regularProperties.push(CCBIProperty.ScaleLock("scale", element.scaleX, element.scaleY, 0));
 	node.regularProperties.push(CCBIProperty.Degrees("rotation", element.rotation));
 	node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", "Animations/chicken_animations.plist", "chicken_move_B.swf/0002"));
 	
