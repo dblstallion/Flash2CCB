@@ -753,6 +753,7 @@ function elementToNode(element)
 	node.regularProperties.push(CCBIProperty.Point("anchorPoint", 0, 1));
 	node.regularProperties.push(CCBIProperty.ScaleLock("scale", element.scaleX, element.scaleY, ScaleType.Absolute));
 	node.regularProperties.push(CCBIProperty.Degrees("rotation", element.rotation));
+	node.regularProperties.push(CCBIProperty.FloatXY("skew", element.skewX, element.skewY));
 	node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", "Animations/chicken_animations.plist", "chicken_move_B.swf/0002"));
 	
 	return node;
