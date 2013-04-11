@@ -1,12 +1,67 @@
-﻿function count(obj)
+﻿var CCBIVersion = 5;
+
+var Platform = 
 {
-	var count = 0;
-	for (var i in obj)
-	{
-		count++;
-	}
-	return count;
+	All : 0,
+	iOS : 1,
+	Mac : 2
 }
+
+var TargetType = 
+{
+	None : 0,
+	DocumentRoot : 1,
+	Owner : 2
+};
+
+var EasingType = 
+{
+	Instant : 0,
+    
+    Linear : 1,
+    
+    CubicIn : 2,
+    CubicOut : 3,
+    CubicInOut : 4,
+    
+    ElasticIn : 5,
+    ElasticOut : 6,
+    ElasticInOut : 7,
+    
+    BounceIn : 8,
+    BounceOut : 9,
+    BounceInOut : 10,
+    
+    BackIn : 11,
+    BackOut : 12,
+    BackInOut : 13
+};
+
+var PositionType = 
+{
+	RelativeBottomLeft : 0,
+    RelativeTopLeft : 1,
+    RelativeTopRight : 2,
+    RelativeBottomRight : 3,
+    Percent : 4,
+    MultiplyResolution : 5
+};
+
+var SizeType = 
+{
+	Absolute : 0,
+    Percent : 1,
+    RelativeContainer : 2,
+    HorizontalPercent : 3,
+    VerticalPercent : 4,
+    MultiplyResolution : 5
+};
+
+var ScaleType = 
+{
+	Absolute : 0,
+    MultiplyResolution : 1
+};
 
 var CCBIProperty =
 {
@@ -25,6 +80,24 @@ var CCBIProperty =
 				JSFLBitWriter.writeFloat(x, outputFile);
 				JSFLBitWriter.writeFloat(y, outputFile);
 				JSFLBitWriter.writeUInt(positionType, outputFile);
+			}
+		};
+	},
+	Size: function(name, width, height, sizeType)
+	{
+		return {
+			propertyName: name,
+			platform: 0,
+			typeID: 1,
+			cacheStrings: function(ccbi)
+			{
+				ccbi.addToStringCache(this.propertyName, false);
+			},
+			serialize: function(ccbi, outputFile)
+			{
+				JSFLBitWriter.writeFloat(width, outputFile);
+				JSFLBitWriter.writeFloat(height, outputFile);
+				JSFLBitWriter.writeUInt(sizeType, outputFile);
 			}
 		};
 	},
@@ -62,24 +135,6 @@ var CCBIProperty =
 			}
 		};
 	},
-	Size: function(name, width, height, sizeType)
-	{
-		return {
-			propertyName: name,
-			platform: 0,
-			typeID: 1,
-			cacheStrings: function(ccbi)
-			{
-				ccbi.addToStringCache(this.propertyName, false);
-			},
-			serialize: function(ccbi, outputFile)
-			{
-				JSFLBitWriter.writeFloat(width, outputFile);
-				JSFLBitWriter.writeFloat(height, outputFile);
-				JSFLBitWriter.writeUInt(sizeType, outputFile);
-			}
-		};
-	},
 	ScaleLock: function(name, x, y, scaleType)
 	{
 		return {
@@ -98,29 +153,12 @@ var CCBIProperty =
 			}
 		};
 	},
-	Flip: function(name, x, y)
+	Degrees: function(name, value)
 	{
 		return {
 			propertyName: name,
 			platform: 0,
-			typeID: 15,
-			cacheStrings: function(ccbi)
-			{
-				ccbi.addToStringCache(this.propertyName, false);
-			},
-			serialize: function(ccbi, outputFile)
-			{
-				JSFLBitWriter.writeBool(x, outputFile);
-				JSFLBitWriter.writeBool(y, outputFile);
-			}
-		};
-	},
-	Float: function(name, value)
-	{
-		return {
-			propertyName: name,
-			platform: 0,
-			typeID: 7,
+			typeID: 5,
 			cacheStrings: function(ccbi)
 			{
 				ccbi.addToStringCache(this.propertyName, false);
@@ -131,12 +169,28 @@ var CCBIProperty =
 			}
 		};
 	},
-	Degrees: function(name, value)
+	Integer: function(name, value)
 	{
 		return {
 			propertyName: name,
 			platform: 0,
-			typeID: 5,
+			typeID: 6,
+			cacheStrings: function(ccbi)
+			{
+				ccbi.addToStringCache(this.propertyName, false);
+			},
+			serialize: function(ccbi, outputFile)
+			{
+				JSFLBitWriter.writeInt(value, outputFile);
+			}
+		};
+	},
+	Float: function(name, value)
+	{
+		return {
+			propertyName: name,
+			platform: 0,
+			typeID: 7,
 			cacheStrings: function(ccbi)
 			{
 				ccbi.addToStringCache(this.propertyName, false);
@@ -164,54 +218,6 @@ var CCBIProperty =
 			}
 		};
 	},
-	Integer: function(name, value)
-	{
-		return {
-			propertyName: name,
-			platform: 0,
-			typeID: 6,
-			cacheStrings: function(ccbi)
-			{
-				ccbi.addToStringCache(this.propertyName, false);
-			},
-			serialize: function(ccbi, outputFile)
-			{
-				JSFLBitWriter.writeInt(value, outputFile);
-			}
-		};
-	},
-	IntegerLabeled: function(name, value)
-	{
-		return {
-			propertyName: name,
-			platform: 0,
-			typeID: 20,
-			cacheStrings: function(ccbi)
-			{
-				ccbi.addToStringCache(this.propertyName, false);
-			},
-			serialize: function(ccbi, outputFile)
-			{
-				JSFLBitWriter.writeInt(value, outputFile);
-			}
-		};
-	},
-	Byte: function(name, value)
-	{
-		return {
-			propertyName: name,
-			platform: 0,
-			typeID: 12,
-			cacheStrings: function(ccbi)
-			{
-				ccbi.addToStringCache(this.propertyName, false);
-			},
-			serialize: function(ccbi, outputFile)
-			{
-				JSFLBitWriter.writeByte(value, outputFile);
-			}
-		};
-	},
 	Check: function(name, value)
 	{
 		return {
@@ -225,23 +231,6 @@ var CCBIProperty =
 			serialize: function(ccbi, outputFile)
 			{
 				JSFLBitWriter.writeBool(value, outputFile);
-			}
-		};
-	},
-	Text: function(name, value)
-	{
-		return {
-			propertyName: name,
-			platform: 0,
-			typeID: 18,
-			cacheStrings: function(ccbi)
-			{
-				ccbi.addToStringCache(this.propertyName, false);
-				ccbi.addToStringCache(value, false);
-			},
-			serialize: function(ccbi, outputFile)
-			{
-				ccbi.writeString(value, false, outputFile);
 			}
 		};
 	},
@@ -281,37 +270,19 @@ var CCBIProperty =
 			}
 		};
 	},
-	FntFile: function(name, fntFile)
+	Byte: function(name, value)
 	{
 		return {
 			propertyName: name,
 			platform: 0,
-			typeID: 17,
+			typeID: 12,
 			cacheStrings: function(ccbi)
 			{
 				ccbi.addToStringCache(this.propertyName, false);
-				ccbi.addToStringCache(fntFile, true);
 			},
 			serialize: function(ccbi, outputFile)
 			{
-				ccbi.writeString(fntFile, true, outputFile);
-			}
-		};
-	},
-	FontTTF: function(name, fontName)
-	{
-		return {
-			propertyName: name,
-			platform: 0,
-			typeID: 19,
-			cacheStrings: function(ccbi)
-			{
-				ccbi.addToStringCache(this.propertyName, false);
-				ccbi.addToStringCache(fontName, false);
-			},
-			serialize: function(ccbi, outputFile)
-			{
-				ccbi.writeString(fontName, false, outputFile);
+				JSFLBitWriter.writeByte(value, outputFile);
 			}
 		};
 	},
@@ -356,6 +327,23 @@ var CCBIProperty =
 			}
 		};
 	},
+	Flip: function(name, x, y)
+	{
+		return {
+			propertyName: name,
+			platform: 0,
+			typeID: 15,
+			cacheStrings: function(ccbi)
+			{
+				ccbi.addToStringCache(this.propertyName, false);
+			},
+			serialize: function(ccbi, outputFile)
+			{
+				JSFLBitWriter.writeBool(x, outputFile);
+				JSFLBitWriter.writeBool(y, outputFile);
+			}
+		};
+	},
 	Blendmode: function(name, src, dst)
 	{
 		return {
@@ -370,6 +358,73 @@ var CCBIProperty =
 			{
 				JSFLBitWriter.writeUInt(src, outputFile);
 				JSFLBitWriter.writeUInt(dst, outputFile);
+			}
+		};
+	},
+	FntFile: function(name, fntFile)
+	{
+		return {
+			propertyName: name,
+			platform: 0,
+			typeID: 17,
+			cacheStrings: function(ccbi)
+			{
+				ccbi.addToStringCache(this.propertyName, false);
+				ccbi.addToStringCache(fntFile, true);
+			},
+			serialize: function(ccbi, outputFile)
+			{
+				ccbi.writeString(fntFile, true, outputFile);
+			}
+		};
+	},
+	Text: function(name, value)
+	{
+		return {
+			propertyName: name,
+			platform: 0,
+			typeID: 18,
+			cacheStrings: function(ccbi)
+			{
+				ccbi.addToStringCache(this.propertyName, false);
+				ccbi.addToStringCache(value, false);
+			},
+			serialize: function(ccbi, outputFile)
+			{
+				ccbi.writeString(value, false, outputFile);
+			}
+		};
+	},
+	FontTTF: function(name, fontName)
+	{
+		return {
+			propertyName: name,
+			platform: 0,
+			typeID: 19,
+			cacheStrings: function(ccbi)
+			{
+				ccbi.addToStringCache(this.propertyName, false);
+				ccbi.addToStringCache(fontName, false);
+			},
+			serialize: function(ccbi, outputFile)
+			{
+				ccbi.writeString(fontName, false, outputFile);
+			}
+		};
+	},
+	IntegerLabeled: function(name, value)
+	{
+		return {
+			propertyName: name,
+			platform: 0,
+			typeID: 20,
+			cacheStrings: function(ccbi)
+			{
+				ccbi.addToStringCache(this.propertyName, false);
+			},
+			serialize: function(ccbi, outputFile)
+			{
+				JSFLBitWriter.writeInt(value, outputFile);
 			}
 		};
 	},
@@ -390,7 +445,123 @@ var CCBIProperty =
 				JSFLBitWriter.writeUInt(target, outputFile);
 			}
 		};
+	},
+	Animation: function(name, animationFile, animationName)
+	{
+		return {
+			propertyName: name,
+			platform: 0,
+			typeID: 22,
+			cacheStrings: function(ccbi)
+			{
+				ccbi.addToStringCache(this.propertyName, false);
+				ccbi.addToStringCache(animationFile, true);
+				ccbi.addToStringCache(animationName, false);
+			},
+			serialize: function(ccbi, outputFile)
+			{
+				ccbi.writeString(animationFile, true, outputFile);
+				ccbi.writeString(animationName, false, outputFile);
+			}
+		};
+	},
+	CCBFile: function(name, ccbFile)
+	{
+		return {
+			propertyName: name,
+			platform: 0,
+			typeID: 23,
+			cacheStrings: function(ccbi)
+			{
+				ccbi.addToStringCache(this.propertyName, false);
+				ccbi.addToStringCache(ccbFile, true);
+			},
+			serialize: function(ccbi, outputFile)
+			{
+				ccbi.writeString(ccbFile, true, outputFile);
+			}
+		};
+	},
+	String: function(name, value)
+	{
+		return {
+			propertyName: name,
+			platform: 0,
+			typeID: 24,
+			cacheStrings: function(ccbi)
+			{
+				ccbi.addToStringCache(this.propertyName, false);
+				ccbi.addToStringCache(value, false);
+			},
+			serialize: function(ccbi, outputFile)
+			{
+				ccbi.writeString(value, false, outputFile);
+			}
+		};
+	},
+	BlockCCControl: function(name, selector, target, controlEvents)
+	{
+		return {
+			propertyName: name,
+			platform: 0,
+			typeID: 25,
+			cacheStrings: function(ccbi)
+			{
+				ccbi.addToStringCache(this.propertyName, false);
+				ccbi.addToStringCache(selector, false);
+			},
+			serialize: function(ccbi, outputFile)
+			{
+				ccbi.writeString(selector, false, outputFile);
+				JSFLBitWriter.writeUInt(target, outputFile);
+				JSFLBitWriter.writeUInt(controlEvents, outputFile);
+			}
+		};
+	},
+	FloatScale: function(name, value, scaleType)
+	{
+		return {
+			propertyName: name,
+			platform: 0,
+			typeID: 26,
+			cacheStrings: function(ccbi)
+			{
+				ccbi.addToStringCache(this.propertyName, false);
+			},
+			serialize: function(ccbi, outputFile)
+			{
+				JSFLBitWriter.writeFloat(value, outputFile);
+				JSFLBitWriter.writeUInt(scaleType, outputFile);
+			}
+		};
+	},
+	FloatXY: function(name, x, y)
+	{
+		return {
+			propertyName: name,
+			platform: 0,
+			typeID: 27,
+			cacheStrings: function(ccbi)
+			{
+				ccbi.addToStringCache(this.propertyName, false);
+			},
+			serialize: function(ccbi, outputFile)
+			{
+				JSFLBitWriter.writeFloat(x, outputFile);
+				JSFLBitWriter.writeFloat(y, outputFile);
+			}
+		};
 	}
+};
+
+function count(obj)
+{
+	var count = 0;
+	for (var i in obj)
+	{
+		count++;
+	}
+	return count;
 }
 
 function CCBINode()
@@ -410,7 +581,7 @@ function CCBINode()
 function CCBI(inJsControlled, inFlattenPaths)
 {
 	return {
-		version: 5,
+		version: CCBIVersion,
 		jsControlled: inJsControlled,
 		flattenPaths: inFlattenPaths,
 		stringCache: {},
@@ -442,7 +613,7 @@ function CCBI(inJsControlled, inFlattenPaths)
 			else
 			{
 				var stringId = this.nextStringId;
-				this.nextStringId = this.nextStringId + 1;
+				this.nextStringId++;
 				
 				this.stringCache[string] = stringId;
 			
@@ -577,10 +748,10 @@ function elementToNode(element)
 	var node = CCBINode();
 	
 	node.class = "CCSprite";
-	node.regularProperties.push(CCBIProperty.Position("position", element.x, element.y, 1));
-	node.regularProperties.push(CCBIProperty.Size("contentSize", element.width, element.height, 0));
+	node.regularProperties.push(CCBIProperty.Position("position", element.x, element.y, PositionType.RelativeTopLeft));
+	node.regularProperties.push(CCBIProperty.Size("contentSize", element.width, element.height, SizeType.Absolute));
 	node.regularProperties.push(CCBIProperty.Point("anchorPoint", 0, 1));
-	node.regularProperties.push(CCBIProperty.ScaleLock("scale", element.scaleX, element.scaleY, 0));
+	node.regularProperties.push(CCBIProperty.ScaleLock("scale", element.scaleX, element.scaleY, ScaleType.Absolute));
 	node.regularProperties.push(CCBIProperty.Degrees("rotation", element.rotation));
 	node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", "Animations/chicken_animations.plist", "chicken_move_B.swf/0002"));
 	
