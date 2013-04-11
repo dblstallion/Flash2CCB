@@ -748,13 +748,23 @@ function elementToNode(element)
 	var node = CCBINode();
 	
 	node.class = "CCSprite";
-	node.regularProperties.push(CCBIProperty.Position("position", element.x, element.y, PositionType.RelativeTopLeft));
+	node.regularProperties.push(CCBIProperty.Position("position", element.transformX, 320 - element.transformY, PositionType.RelativeBottomLeft));
 	node.regularProperties.push(CCBIProperty.Size("contentSize", element.width, element.height, SizeType.Absolute));
-	node.regularProperties.push(CCBIProperty.Point("anchorPoint", 0, 1));
+	var anchor = element.getTransformationPoint();
+	anchor.x = anchor.x / element.width;
+	anchor.y = 1.0 - anchor.y / element.height;
+	node.regularProperties.push(CCBIProperty.Point("anchorPoint", anchor.x, anchor.y));
 	node.regularProperties.push(CCBIProperty.ScaleLock("scale", element.scaleX, element.scaleY, ScaleType.Absolute));
-	node.regularProperties.push(CCBIProperty.Degrees("rotation", element.rotation));
-	node.regularProperties.push(CCBIProperty.FloatXY("skew", element.skewX, element.skewY));
+	node.regularProperties.push(CCBIProperty.Degrees("rotationX", element.skewX));
+	node.regularProperties.push(CCBIProperty.Degrees("rotationY", element.skewY));
 	node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", "Animations/chicken_animations.plist", "chicken_move_B.swf/0002"));
+	
+	fl.trace("position = " + element.transformX + ", " + element.transformY);
+	fl.trace("scale = " + element.scaleX + ", " + element.scaleY);
+	fl.trace("anchor = " + anchor.x + ", " + anchor.y);
+	fl.trace("rotation = " + element.rotation);
+	fl.trace("skew = " + element.skewX + ", " + element.skewY);
+	fl.trace("contentSize = " + element.width + ", " + element.height);
 	
 	return node;
 }
@@ -764,7 +774,6 @@ function layerToNode(layer)
 	var node = CCBINode();
 	
 	node.class = "CCLayer";
-	node.regularProperties.push(CCBIProperty.Point("anchorPoint", 0, 1));
 	
 	for(var elementIndex in layer.frames[0].elements)
 	{
@@ -786,6 +795,6 @@ var root = layerToNode(fl.getDocumentDOM().getTimeline().layers[0]);
 ccbi.rootNode = root;
 
 fl.trace("Write...");
-ccbi.write('C:\\Users\\Daniel\\Downloads\\test.ccbi');
+ccbi.write('C:\\Users\\Daniel\\Documents\\Visual Studio 2010\\Projects\\sfp\\sfp\\Resources\\test.ccbi');
 
 fl.trace("Done!");
