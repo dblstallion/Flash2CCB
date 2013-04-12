@@ -761,7 +761,7 @@ function elementToNode(element)
 	node.regularProperties.push(CCBIProperty.ScaleLock("scale", element.scaleX, element.scaleY, ScaleType.Absolute));
 	node.regularProperties.push(CCBIProperty.Degrees("rotationX", element.skewX));
 	node.regularProperties.push(CCBIProperty.Degrees("rotationY", element.skewY));
-	node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", "test.plist", element.libraryItem.sourceFilePath.replace(/^.*[\\\/]/, '')));
+	node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", "test.plist", element.libraryItem.name.replace(/^.*[\\\/]/, '') + ".png"));
 	
 	/*fl.trace("position = " + element.transformX + ", " + (fl.getDocumentDOM().height - element.transformY));
 	fl.trace("scale = " + element.scaleX + ", " + element.scaleY);
@@ -777,7 +777,12 @@ exportList = [];
 
 function exportItem(item)
 {
-	var filePath = FLfile.uriToPlatformPath(item.sourceFilePath);
+	var fileName = item.name.replace(/^.*[\\\/]/, '');
+	var filePath = FLfile.getSystemTempFolder()+fileName+".png";
+	var fileURI = FLfile.platformPathToURI(filePath);
+	
+	fl.trace("Exporting " + filePath);
+	item.exportToFile(fileURI);
 	
 	exportList.push('"' + filePath + '"');
 }
@@ -792,7 +797,8 @@ function packTextures()
 	var win_tempLamePath =FLfile.getSystemTempFolder()+'lame.bat';
 	var win_tempLameURI =FLfile.platformPathToURI(win_tempLamePath);
 
-	var command = '"C:\\Program Files (x86)\\CodeAndWeb\\TexturePacker\\bin\\TexturePacker.exe" --format cocos2d --data ' + outputData + ' --texture-format pvr2 --sheet '+ outputSheet + ' ' + sourceFiles;
+	var command = '"C:\\Program Files (x86)\\CodeAndWeb\\TexturePacker\\bin\\TexturePacker.exe" --format cocos2d --data ' + outputData + ' --texture-format pvr2 --opt RGBA5551 --sheet '+ outputSheet + ' ' + sourceFiles;
+	command = command + "\r\npause";
 	FLfile.write(win_tempLameURI, command);
 	FLfile.runCommandLine(win_tempLamePath);
 }
@@ -810,11 +816,8 @@ function layerToNode(layer)
 		// Export the bitmap
 		exportItem(element.libraryItem);
 		
-		fl.trace("Adding sprite");
 		node.children.push(elementToNode(element));
 	}
-	
-	packTextures();
 	
 	return node;
 }
@@ -823,7 +826,20 @@ fl.trace("Working...");
 
 var ccbi = CCBI(false, false);
 
-var root = layerToNode(fl.getDocumentDOM().getTimeline().layers[0]);
+var root = CCBINode();
+	
+root.class = "CCLayer";
+
+var layers = fl.getDocumentDOM().getTimeline().layers;
+for(var layerIndex = layers.length - 1; layerIndex >= 0; layerIndex--)
+{
+	var layerNode = layerToNode(layers[layerIndex]);
+	
+	root.children.push(layerNode);
+}
+
+packTextures();
+
 
 ccbi.rootNode = root;
 
