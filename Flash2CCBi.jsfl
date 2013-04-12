@@ -751,15 +751,17 @@ function elementToNode(element)
 	node.regularProperties.push(CCBIProperty.Position("position", element.transformX, 320 - element.transformY, PositionType.RelativeBottomLeft));
 	node.regularProperties.push(CCBIProperty.Size("contentSize", element.width, element.height, SizeType.Absolute));
 	var anchor = element.getTransformationPoint();
+	fl.trace(anchor.x);
+	fl.trace(anchor.y);
 	anchor.x = anchor.x / element.width;
 	anchor.y = 1.0 - anchor.y / element.height;
 	node.regularProperties.push(CCBIProperty.Point("anchorPoint", anchor.x, anchor.y));
 	node.regularProperties.push(CCBIProperty.ScaleLock("scale", element.scaleX, element.scaleY, ScaleType.Absolute));
 	node.regularProperties.push(CCBIProperty.Degrees("rotationX", element.skewX));
 	node.regularProperties.push(CCBIProperty.Degrees("rotationY", element.skewY));
-	node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", "Animations/chicken_animations.plist", "chicken_move_B.swf/0002"));
+	node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", "test.plist", "Icon170x170.png"));
 	
-	fl.trace("position = " + element.transformX + ", " + element.transformY);
+	fl.trace("position = " + element.transformX + ", " + (320 - element.transformY));
 	fl.trace("scale = " + element.scaleX + ", " + element.scaleY);
 	fl.trace("anchor = " + anchor.x + ", " + anchor.y);
 	fl.trace("rotation = " + element.rotation);
@@ -767,6 +769,34 @@ function elementToNode(element)
 	fl.trace("contentSize = " + element.width + ", " + element.height);
 	
 	return node;
+}
+
+exportList = [];
+
+function exportItem(item)
+{
+	fl.trace("Adding bitmap " + item.sourceFilePath);
+	var filePath = FLfile.uriToPlatformPath(item.sourceFilePath);
+	
+	exportList.push('"' + filePath + '"');
+	
+	fl.trace("Adding bitmap " + filePath);
+}
+
+function packTextures()
+{
+	var sourceFiles = exportList.join(" ");
+	var outputData = '"C:\\Users\\Daniel\\Documents\\Visual Studio 2010\\Projects\\sfp\\sfp\\Resources\\test.plist"';
+	var outputSheet = '"C:\\Users\\Daniel\\Documents\\Visual Studio 2010\\Projects\\sfp\\sfp\\Resources\\test.pvr"';
+	
+	//get users temp folder& convert to URI
+	var win_tempLamePath =FLfile.getSystemTempFolder()+'lame.bat';
+	var win_tempLameURI =FLfile.platformPathToURI(win_tempLamePath);
+
+	var command = '"C:\\Program Files (x86)\\CodeAndWeb\\TexturePacker\\bin\\TexturePacker.exe" --format cocos2d --data ' + outputData + ' --texture-format pvr2 --sheet '+ outputSheet + ' ' + sourceFiles;
+	var command = command + '\r\npause';
+	FLfile.write(win_tempLameURI, command);
+	FLfile.runCommandLine(win_tempLamePath);
 }
 
 function layerToNode(layer)
@@ -779,9 +809,14 @@ function layerToNode(layer)
 	{
 		var element = layer.frames[0].elements[elementIndex];
 		
+		// Export the bitmap
+		exportItem(element.libraryItem);
+		
 		fl.trace("Adding sprite");
 		node.children.push(elementToNode(element));
 	}
+	
+	packTextures();
 	
 	return node;
 }
