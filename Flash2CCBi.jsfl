@@ -747,26 +747,28 @@ function elementToNode(element)
 {
 	var node = CCBINode();
 	
-	node.class = "CCSprite";
-	node.regularProperties.push(CCBIProperty.Position("position", element.transformX, 320 - element.transformY, PositionType.RelativeBottomLeft));
-	node.regularProperties.push(CCBIProperty.Size("contentSize", element.width, element.height, SizeType.Absolute));
 	var anchor = element.getTransformationPoint();
-	fl.trace(anchor.x);
-	fl.trace(anchor.y);
+	// setting the transformation point here may seem stupid but it prevents a glitch
+	element.setTransformationPoint(anchor);
 	anchor.x = anchor.x / element.width;
 	anchor.y = 1.0 - anchor.y / element.height;
+	
+	node.class = "CCSprite";
+	node.regularProperties.push(CCBIProperty.Position("position", element.transformX, fl.getDocumentDOM().height - element.transformY, PositionType.RelativeBottomLeft));
+	node.regularProperties.push(CCBIProperty.Size("contentSize", element.width, element.height, SizeType.Absolute));
+	
 	node.regularProperties.push(CCBIProperty.Point("anchorPoint", anchor.x, anchor.y));
 	node.regularProperties.push(CCBIProperty.ScaleLock("scale", element.scaleX, element.scaleY, ScaleType.Absolute));
 	node.regularProperties.push(CCBIProperty.Degrees("rotationX", element.skewX));
 	node.regularProperties.push(CCBIProperty.Degrees("rotationY", element.skewY));
-	node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", "test.plist", "Icon170x170.png"));
+	node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", "test.plist", element.libraryItem.sourceFilePath.replace(/^.*[\\\/]/, '')));
 	
-	fl.trace("position = " + element.transformX + ", " + (320 - element.transformY));
+	/*fl.trace("position = " + element.transformX + ", " + (fl.getDocumentDOM().height - element.transformY));
 	fl.trace("scale = " + element.scaleX + ", " + element.scaleY);
 	fl.trace("anchor = " + anchor.x + ", " + anchor.y);
 	fl.trace("rotation = " + element.rotation);
 	fl.trace("skew = " + element.skewX + ", " + element.skewY);
-	fl.trace("contentSize = " + element.width + ", " + element.height);
+	fl.trace("contentSize = " + element.width + ", " + element.height);*/
 	
 	return node;
 }
@@ -775,12 +777,9 @@ exportList = [];
 
 function exportItem(item)
 {
-	fl.trace("Adding bitmap " + item.sourceFilePath);
 	var filePath = FLfile.uriToPlatformPath(item.sourceFilePath);
 	
 	exportList.push('"' + filePath + '"');
-	
-	fl.trace("Adding bitmap " + filePath);
 }
 
 function packTextures()
@@ -794,7 +793,6 @@ function packTextures()
 	var win_tempLameURI =FLfile.platformPathToURI(win_tempLamePath);
 
 	var command = '"C:\\Program Files (x86)\\CodeAndWeb\\TexturePacker\\bin\\TexturePacker.exe" --format cocos2d --data ' + outputData + ' --texture-format pvr2 --sheet '+ outputSheet + ' ' + sourceFiles;
-	var command = command + '\r\npause';
 	FLfile.write(win_tempLameURI, command);
 	FLfile.runCommandLine(win_tempLamePath);
 }
