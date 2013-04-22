@@ -844,6 +844,6 @@ packTextures();
 ccbi.rootNode = root;
 
 fl.trace("Write...");
-ccbi.write('C:\\Users\\Daniel\\Documents\\Visual Studio 2010\\Projects\\sfp\\sfp\\Resources\\test.ccbi');
+ccbi.write(fl.browseForFileURL("save", "Save CCBI"));
 
 fl.trace("Done!");

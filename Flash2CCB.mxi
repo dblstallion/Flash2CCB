@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macromedia-extension name="Flash2CCB" version="1.0.0" type="command">
+  <author name="Double Stallion Games" />
+  <update url="https://raw.github.com/dblstallion/Flash2CCB/master/Flash2CCB.mxu" />
+  <products>
+    <product name="Flash" version="10" primary="true" />
+  </products>
+  <description>
+    <![CDATA[
+This extension exports files from Flash into CocosBuilder format
+]]>
+  </description>
+  <ui-access>
+    <![CDATA[
+The command can be found in ‘Commands > Flash2CCBi’
+]]>
+  </ui-access>
+  <license-agreement>
+    <![CDATA[
+]]>
+  </license-agreement>
+  <files>
+    <file source="JSFLBitWriter/Release/JSFLBitWriter.dll" destination="$flash/External Libraries" />
+	<file source="Flash2CCB/Flash2CCBi.jsfl" destination="$flash/Commands" />
+  </files>
+</macromedia-extension>
