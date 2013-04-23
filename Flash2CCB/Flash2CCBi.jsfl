@@ -731,7 +731,7 @@ function CCBI(inJsControlled, inFlattenPaths)
 			
 			this.addNodeToStringCache(this.rootNode);
 			
-			var outputFile = JSFLBitWriter.openFile(filename); // Set full filepath here.
+			var outputFile = JSFLBitWriter.openFile(FLfile.uriToPlatformPath(filename)); // Set full filepath here.
 			
 			this.writeHeader(outputFile);
 			this.writeStringCache(outputFile);
@@ -743,7 +743,7 @@ function CCBI(inJsControlled, inFlattenPaths)
 	};
 }
 
-function elementToNode(element)
+function elementToNode(element, fileOutput)
 {
 	var node = CCBINode();
 	
@@ -761,7 +761,7 @@ function elementToNode(element)
 	node.regularProperties.push(CCBIProperty.ScaleLock("scale", element.scaleX, element.scaleY, ScaleType.Absolute));
 	node.regularProperties.push(CCBIProperty.Degrees("rotationX", element.skewX));
 	node.regularProperties.push(CCBIProperty.Degrees("rotationY", element.skewY));
-	node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", "test.plist", element.libraryItem.name.replace(/^.*[\\\/]/, '') + ".png"));
+	node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", fileOutput.replace(/^.*[\\\/]/, '') + ".plist", element.libraryItem.name.replace(/^.*[\\\/]/, '') + ".png"));
 	
 	/*fl.trace("position = " + element.transformX + ", " + (fl.getDocumentDOM().height - element.transformY));
 	fl.trace("scale = " + element.scaleX + ", " + element.scaleY);
@@ -787,23 +787,23 @@ function exportItem(item)
 	exportList.push('"' + filePath + '"');
 }
 
-function packTextures()
+function packTextures(fileOutput)
 {
 	var sourceFiles = exportList.join(" ");
-	var outputData = '"C:\\Users\\Daniel\\Documents\\Visual Studio 2010\\Projects\\sfp\\sfp\\Resources\\test.plist"';
-	var outputSheet = '"C:\\Users\\Daniel\\Documents\\Visual Studio 2010\\Projects\\sfp\\sfp\\Resources\\test.pvr"';
+	var outputData = FLfile.uriToPlatformPath(fileOutput + ".plist");
+	var outputSheet = FLfile.uriToPlatformPath(fileOutput + ".pvr");
 	
 	//get users temp folder& convert to URI
-	var win_tempLamePath =FLfile.getSystemTempFolder()+'lame.bat';
-	var win_tempLameURI =FLfile.platformPathToURI(win_tempLamePath);
+	var win_tempLamePath = FLfile.getSystemTempFolder()+'lame.bat';
+	var win_tempLameURI = FLfile.platformPathToURI(win_tempLamePath);
 
-	var command = '"C:\\Program Files (x86)\\CodeAndWeb\\TexturePacker\\bin\\TexturePacker.exe" --format cocos2d --data ' + outputData + ' --texture-format pvr2 --opt RGBA5551 --sheet '+ outputSheet + ' ' + sourceFiles;
+	var command = '"C:\\Program Files (x86)\\CodeAndWeb\\TexturePacker\\bin\\TexturePacker.exe" --format cocos2d --data "' + outputData + '" --texture-format pvr2 --opt RGBA5551 --sheet "'+ outputSheet + '" ' + sourceFiles;
 	command = command + "\r\npause";
 	FLfile.write(win_tempLameURI, command);
 	FLfile.runCommandLine(win_tempLamePath);
 }
 
-function layerToNode(layer)
+function layerToNode(layer, fileOutput)
 {
 	var node = CCBINode();
 	
@@ -816,13 +816,16 @@ function layerToNode(layer)
 		// Export the bitmap
 		exportItem(element.libraryItem);
 		
-		node.children.push(elementToNode(element));
+		node.children.push(elementToNode(element, fileOutput));
 	}
 	
 	return node;
 }
 
-fl.trace("Working...");
+var fileOutput = fl.browseForFileURL("save", "Save CCBI");
+
+// Strip extension if it exists
+fileOutput = fileOutput.replace(/\.[^\.]+$/, '');
 
 var ccbi = CCBI(false, false);
 
@@ -833,17 +836,17 @@ root.class = "CCLayer";
 var layers = fl.getDocumentDOM().getTimeline().layers;
 for(var layerIndex = layers.length - 1; layerIndex >= 0; layerIndex--)
 {
-	var layerNode = layerToNode(layers[layerIndex]);
+	var layerNode = layerToNode(layers[layerIndex], fileOutput);
 	
 	root.children.push(layerNode);
 }
 
-packTextures();
+packTextures(fileOutput);
 
 
 ccbi.rootNode = root;
 
 fl.trace("Write...");
-ccbi.write(fl.browseForFileURL("save", "Save CCBI"));
+ccbi.write(fileOutput + ".ccbi");
 
 fl.trace("Done!");
