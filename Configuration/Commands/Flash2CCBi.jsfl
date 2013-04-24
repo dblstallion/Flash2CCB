@@ -745,46 +745,64 @@ function CCBI(inJsControlled, inFlattenPaths)
 
 function elementToNode(element, fileOutput)
 {
-	var node = CCBINode();
-	
-	var anchor = element.getTransformationPoint();
-	// setting the transformation point here may seem stupid but it prevents a glitch
-	element.setTransformationPoint(anchor);
-	anchor.x = anchor.x / element.width;
-	anchor.y = 1.0 - anchor.y / element.height;
-	
-	node.class = "CCSprite";
-	node.regularProperties.push(CCBIProperty.Position("position", element.transformX, fl.getDocumentDOM().height - element.transformY, PositionType.RelativeBottomLeft));
-	node.regularProperties.push(CCBIProperty.Size("contentSize", element.width, element.height, SizeType.Absolute));
-	
-	node.regularProperties.push(CCBIProperty.Point("anchorPoint", anchor.x, anchor.y));
-	node.regularProperties.push(CCBIProperty.ScaleLock("scale", element.scaleX, element.scaleY, ScaleType.Absolute));
-	node.regularProperties.push(CCBIProperty.Degrees("rotationX", element.skewX));
-	node.regularProperties.push(CCBIProperty.Degrees("rotationY", element.skewY));
-	node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", fileOutput.replace(/^.*[\\\/]/, '') + ".plist", element.libraryItem.name.replace(/^.*[\\\/]/, '') + ".png"));
-	
-	/*fl.trace("position = " + element.transformX + ", " + (fl.getDocumentDOM().height - element.transformY));
-	fl.trace("scale = " + element.scaleX + ", " + element.scaleY);
-	fl.trace("anchor = " + anchor.x + ", " + anchor.y);
-	fl.trace("rotation = " + element.rotation);
-	fl.trace("skew = " + element.skewX + ", " + element.skewY);
-	fl.trace("contentSize = " + element.width + ", " + element.height);*/
-	
-	return node;
+	try
+	{
+		var node = CCBINode();
+		
+		var anchor = element.getTransformationPoint();
+		// setting the transformation point here may seem stupid but it prevents a glitch
+		element.setTransformationPoint(anchor);
+		anchor.x = anchor.x / element.width;
+		anchor.y = 1.0 - anchor.y / element.height;
+		
+		node.class = "CCSprite";
+		node.regularProperties.push(CCBIProperty.Position("position", element.transformX, fl.getDocumentDOM().height - element.transformY, PositionType.RelativeBottomLeft));
+		node.regularProperties.push(CCBIProperty.Size("contentSize", element.width, element.height, SizeType.Absolute));
+		
+		node.regularProperties.push(CCBIProperty.Point("anchorPoint", anchor.x, anchor.y));
+		node.regularProperties.push(CCBIProperty.ScaleLock("scale", element.scaleX, element.scaleY, ScaleType.Absolute));
+		node.regularProperties.push(CCBIProperty.Degrees("rotationX", element.skewX));
+		node.regularProperties.push(CCBIProperty.Degrees("rotationY", element.skewY));
+		node.regularProperties.push(CCBIProperty.SpriteFrame("displayFrame", fileOutput.replace(/^.*[\\\/]/, '') + ".plist", element.libraryItem.name.replace(/^.*[\\\/]/, '') + ".png"));
+		
+		/*fl.trace("position = " + element.transformX + ", " + (fl.getDocumentDOM().height - element.transformY));
+		fl.trace("scale = " + element.scaleX + ", " + element.scaleY);
+		fl.trace("anchor = " + anchor.x + ", " + anchor.y);
+		fl.trace("rotation = " + element.rotation);
+		fl.trace("skew = " + element.skewX + ", " + element.skewY);
+		fl.trace("contentSize = " + element.width + ", " + element.height);*/
+		
+		return node;
+	}
+	catch(error)
+	{
+		fl.trace("Error creating node from " + element.name);
+		throw error;
+	}
 }
 
 exportList = [];
 
 function exportItem(item)
 {
-	var fileName = item.name.replace(/^.*[\\\/]/, '');
-	var filePath = FLfile.getSystemTempFolder()+fileName+".png";
-	var fileURI = FLfile.platformPathToURI(filePath);
-	
-	fl.trace("Exporting " + filePath);
-	item.exportToFile(fileURI);
-	
-	exportList.push('"' + filePath + '"');
+	if(item == undefined)
+		throw "exportItem: item must not be undefined";
+		
+	try
+	{
+		var fileName = item.name.replace(/^.*[\\\/]/, '');
+		var filePath = FLfile.getSystemTempFolder()+fileName+".png";
+		var fileURI = FLfile.platformPathToURI(filePath);
+		
+		fl.trace("Exporting " + filePath);
+		item.exportToFile(fileURI);
+		
+		exportList.push('"' + filePath + '"');
+	}
+	catch(error)
+	{
+		fl.trace("Error exporting " + item.name);
+	}
 }
 
 function packTextures(fileOutput)
@@ -805,21 +823,37 @@ function packTextures(fileOutput)
 
 function layerToNode(layer, fileOutput)
 {
-	var node = CCBINode();
-	
-	node.class = "CCLayer";
-	
-	for(var elementIndex in layer.frames[0].elements)
+	try
 	{
-		var element = layer.frames[0].elements[elementIndex];
+		var node = CCBINode();
 		
-		// Export the bitmap
-		exportItem(element.libraryItem);
+		node.class = "CCLayer";
 		
-		node.children.push(elementToNode(element, fileOutput));
+		for(var elementIndex in layer.frames[0].elements)
+		{
+			var element = layer.frames[0].elements[elementIndex];
+			
+			// Export the bitmap
+			try
+			{
+				exportItem(element.libraryItem);
+			}
+			catch(error)
+			{
+				error = error + "\nWhile exporting element " + element.name;
+				throw error;
+			}
+			
+			node.children.push(elementToNode(element, fileOutput));
+		}
+		
+		return node;
 	}
-	
-	return node;
+	catch(error)
+	{
+		error = error + "\nWhile creating CCLayer from " + layer.name;
+		throw error;
+	}
 }
 
 var fileOutput = fl.browseForFileURL("save", "Save CCBI");
@@ -836,9 +870,14 @@ root.class = "CCLayer";
 var layers = fl.getDocumentDOM().getTimeline().layers;
 for(var layerIndex = layers.length - 1; layerIndex >= 0; layerIndex--)
 {
-	var layerNode = layerToNode(layers[layerIndex], fileOutput);
+	var layer = layers[layerIndex];
 	
-	root.children.push(layerNode);
+	if(layer.layerType == "normal")
+	{
+		var layerNode = layerToNode(layer, fileOutput);
+	
+		root.children.push(layerNode);
+	}
 }
 
 packTextures(fileOutput);
@@ -846,7 +885,6 @@ packTextures(fileOutput);
 
 ccbi.rootNode = root;
 
-fl.trace("Write...");
 ccbi.write(fileOutput + ".ccbi");
 
 fl.trace("Done!");

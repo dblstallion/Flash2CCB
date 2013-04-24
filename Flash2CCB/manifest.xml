@@ -1,0 +1,18 @@
+<manifest>
+    <module>
+        <meta>
+            <name>Flash2CCB</name>
+            <description>A module for exporting flash files to CCBI format</description>
+            <version>0.1</version>
+            <url>https://github.com/dblstallion/Flash2CCB</url>
+            <author>
+                <name>Daniel Menard</name>
+                <company>Double Stallion Games</company>
+                <email>dan@dblstallion.com</email>
+            </author>
+        </meta>
+        <data>
+            <namespace>Flash2CCB</namespace>
+        </data>
+    </module>
+</manifest>
