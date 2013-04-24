@@ -52,6 +52,17 @@ char *allocJSString(JSContext *cx, jsval val)
     return outputString;
 }
 
+void flipSlashes(char *path)
+{
+    while(*path != '\0')
+    {
+        if(*path == '/')
+            *path = '\\';
+
+        path++;
+    }
+}
+
 int log2(uint64_t val)
 {
     int log = 0;
@@ -232,6 +243,7 @@ JSBool openFile(JSContext *cx, JSObject *obj, unsigned int argc, jsval *argv, js
     }
 
     filename = allocJSString(cx, argv[0]);
+    flipSlashes(filename);
     outputFile = fopen(filename, "wb");
     free(filename);
 

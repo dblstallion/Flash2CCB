@@ -1,4 +1,4 @@
-xjsfl.init(this, ['Class', 'Property', 'Node']);
+xjsfl.init(this, ['Class', 'Property', 'Node', 'URI']);
 
 var CCBI =
 {
@@ -55,7 +55,7 @@ var CCBI =
     
     writeStringCache: function(outputFile)
     {
-        var size = count(this.stringCache);
+        var size = Utils.getKeys(this.stringCache).length;
         
         JSFLBitWriter.writeUInt(size, outputFile);
         
@@ -75,6 +75,11 @@ var CCBI =
     
     addNodeToStringCache: function(node)
     {
+        if(!node)
+        {
+            throw new Error("Argument Error: addNodeToStringCache does not accept null node");
+        }
+        
         this.addToStringCache(node.class, false);
         if(this.jsControlled)
         {
@@ -104,27 +109,40 @@ var CCBI =
 
     writeNodeGraph: function(outputFile)
     {
-        this.rootNode.serialize(this, outputFile);
+        if(this.rootNode)
+        {
+            this.rootNode.serialize(this, outputFile);
+        }
+        else
+        {
+            trace("Warning: Writing nodegraph but root node is missing");
+        }
     },
     
-    write: function (filename)
+    write: function (uri)
     {
         // Reset string cache
         this.stringCache = {};
         this.nextStringId = 0;
         
         // Populate string cache
-        this.addNodeToStringCache(this.rootNode);
+        if(this.rootNode)
+            this.addNodeToStringCache(this.rootNode);
+            
+        var outputPath = URI.toPath(uri);
         
-        // Write file
-        var outputFile = JSFLBitWriter.openFile(FLfile.uriToPlatformPath(filename)); // Set full filepath here.
-        
-        this.writeHeader(outputFile);
-        this.writeStringCache(outputFile);
-        this.writeSequences(outputFile);
-        this.writeNodeGraph(outputFile);
-        
-        JSFLBitWriter.closeFile(outputFile);
+        if(outputPath)
+        {
+            // Write file
+            var outputFile = JSFLBitWriter.openFile(outputPath);
+            
+            this.writeHeader(outputFile);
+            this.writeStringCache(outputFile);
+            this.writeSequences(outputFile);
+            this.writeNodeGraph(outputFile);
+            
+            JSFLBitWriter.closeFile(outputFile);
+        }
     }
 };
 
