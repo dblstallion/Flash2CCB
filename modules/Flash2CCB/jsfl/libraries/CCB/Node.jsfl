@@ -8,16 +8,21 @@ var Node =
             this.class = "CCNode";
         else
             this.class = class;
+            
+        this.sequences = [];
+        this.regularProperties = [];
+        this.extraProperties = [];
+        this.children = [];
     },
     
     class: null,
     jsController: null,
     memberVarAssignmentType: 0,
     memberVarAssignmentName: null,
-    sequences: [],
-    regularProperties: [],
-    extraProperties: [],
-    children: [],
+    sequences: null,
+    regularProperties: null,
+    extraProperties: null,
+    children: null,
     
     serialize: function(ccbi, outputFile)
     {

@@ -15,11 +15,12 @@ var Property =
         {
             this.name = name;
             this.typeID = typeID;
+			this.platform = Platform.All;
         },
         
         name: null,
         typeID: null,
-        platform: Platform.All,
+        platform: null,
         
         cacheStrings: function(ccbi)
         {
