@@ -1,4 +1,4 @@
-xjsfl.init(this, ['Class', 'URI', 'Utils']);
+xjsfl.init(this, ['Class', 'URI', 'Utils', 'Folder']);
 
 var NUMBER_PADDING = 2;
 var IMAGE_FORMAT = "png";
@@ -75,7 +75,7 @@ var SpriteSheetGroup =
         }
         
         // Set the metadata
-        item.addData("spriteSheet", "string", this.getSpriteSheetFile(this.spriteSheets.length))
+        item.addData("spriteSheet", "string", this.getSpriteSheetFile(this.spriteSheets.length) + "." + META_FORMAT);
     },
     
     addBitmap: function(bitmap)
@@ -126,14 +126,17 @@ var SpriteSheetGroup =
         }
     },
     
-    exportSpriteSheets: function(baseURI)
+    exportSpriteSheets: function(folderURI)
     {
-        baseURI = URI.toURI(baseURI, 1);
-        baseURI = URI.getFolder(baseURI);
+        folderURI = URI.toURI(folderURI, 1);
+        folderURI = URI.getFolder(folderURI);
+        
+        // Create the output folder
+        new Folder(URI.getFolder(folderURI + this.getSpriteSheetFile(0)), true);
         
         for(var i = 0; i < this.spriteSheets.length; i++)
         {
-            var uri = baseURI + this.getSpriteSheetFile(i + 1);
+            var uri = folderURI + this.getSpriteSheetFile(i + 1);
             
             this.spriteSheets[i].exportSpriteSheet(uri, { format: IMAGE_FORMAT, bitDepth: 32, backgroundColor: "#00000000"});
         }

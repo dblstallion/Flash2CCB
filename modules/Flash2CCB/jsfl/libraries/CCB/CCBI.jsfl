@@ -6,6 +6,11 @@ var CCBI =
     {
         this.jsControlled = jsControlled;
         this.flattenPaths = flattenPaths;
+        
+        // Reset string cache
+        this.stringCache = {};
+        this.nextStringId = 0;
+        this.rootNode = null;
     },
     
     version: 5,
@@ -129,7 +134,7 @@ var CCBI =
         if(this.rootNode)
             this.addNodeToStringCache(this.rootNode);
             
-        var outputPath = URI.toPath(uri);
+        var outputPath = URI.toPath(uri, 1);
         
         if(outputPath)
         {

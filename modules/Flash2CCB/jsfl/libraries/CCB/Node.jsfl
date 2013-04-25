@@ -1,4 +1,4 @@
-xjsfl.init(this, ['Class']);
+xjsfl.init(this, ['Class', 'CCBI']);
 
 var Node =
 {
@@ -47,12 +47,12 @@ var Node =
         
         for(var i = 0; i < this.regularProperties.length; i++)
         {
-            this.regularProperties[i].serialize(this, outputFile);
+            this.regularProperties[i].serialize(ccbi, outputFile);
         }
         
         for(var i = 0; i < this.extraProperties.length; i++)
         {
-            this.extraProperties[i].serialize(this, outputFile);
+            this.extraProperties[i].serialize(ccbi, outputFile);
         }
         
         JSFLBitWriter.writeUInt(this.children.length, outputFile);

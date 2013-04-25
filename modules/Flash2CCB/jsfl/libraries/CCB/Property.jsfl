@@ -1,4 +1,4 @@
-xjsfl.init(this, ['Class']);
+xjsfl.init(this, ['Class', 'CCBI']);
 
 var Platform = 
 {
@@ -51,7 +51,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeFloat(this.x, outputFile);
             JSFLBitWriter.writeFloat(this.y, outputFile);
@@ -75,7 +75,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeFloat(this.width, outputFile);
             JSFLBitWriter.writeFloat(this.height, outputFile);
@@ -97,7 +97,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeFloat(this.x, outputFile);
             JSFLBitWriter.writeFloat(this.y, outputFile);
@@ -118,7 +118,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeFloat(this.x, outputFile);
             JSFLBitWriter.writeFloat(this.y, outputFile);
@@ -141,7 +141,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeFloat(this.x, outputFile);
             JSFLBitWriter.writeFloat(this.y, outputFile);
@@ -161,7 +161,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeFloat(this.value, outputFile);
         }
@@ -179,7 +179,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeInt(this.value, outputFile);
         }
@@ -197,7 +197,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeFloat(this.value, outputFile);
         }
@@ -217,7 +217,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeFloat(this.value, outputFile);
             JSFLBitWriter.writeFloat(this.valueVar, outputFile);
@@ -236,7 +236,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeBool(this.value, outputFile);
         }
@@ -256,7 +256,7 @@ var Property =
         
         cacheStrings: function(ccbi)
         {
-            this._super.cacheStrings(ccbi);
+            this._super(ccbi);
             
             ccbi.addToStringCache(this.spriteSheetFile, true);
             ccbi.addToStringCache(this.spriteFile, false);
@@ -264,7 +264,7 @@ var Property =
             
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             ccbi.writeString(this.spriteSheetFile, true, outputFile);
 			ccbi.writeString(this.spriteFile, false, outputFile);
@@ -283,14 +283,14 @@ var Property =
         
         cacheStrings: function(ccbi)
         {
-            this._super.cacheStrings(ccbi);
+            this._super(ccbi);
             
             ccbi.addToStringCache(this.spriteFile, true);
         },
             
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
 			ccbi.writeString(this.spriteFile, true, outputFile);
         }
@@ -308,7 +308,7 @@ var Property =
             
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
 			JSFLBitWriter.writeByte(value, outputFile);
         }
@@ -330,7 +330,7 @@ var Property =
             
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
 			JSFLBitWriter.writeByte(this.r, outputFile);
             JSFLBitWriter.writeByte(this.g, outputFile);
@@ -364,7 +364,7 @@ var Property =
             
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
 			JSFLBitWriter.writeFloat(r, outputFile);
             JSFLBitWriter.writeFloat(g, outputFile);
@@ -391,7 +391,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeBool(this.x, outputFile);
             JSFLBitWriter.writeBool(this.y, outputFile);
@@ -412,7 +412,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeUInt(this.src, outputFile);
 			JSFLBitWriter.writeUInt(this.dst, outputFile);
@@ -431,14 +431,14 @@ var Property =
         
         cacheStrings: function(ccbi)
         {
-            this._super.cacheStrings(ccbi);
+            this._super(ccbi);
             
             ccbi.addToStringCache(this.fntFile, true);
         },
             
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
 			ccbi.writeString(this.fntFile, true, outputFile);
         }
@@ -456,14 +456,14 @@ var Property =
         
         cacheStrings: function(ccbi)
         {
-            this._super.cacheStrings(ccbi);
+            this._super(ccbi);
             
             ccbi.addToStringCache(this.value, false);
         },
             
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
 			ccbi.writeString(this.value, false, outputFile);
         }
@@ -481,14 +481,14 @@ var Property =
         
         cacheStrings: function(ccbi)
         {
-            this._super.cacheStrings(ccbi);
+            this._super(ccbi);
             
             ccbi.addToStringCache(this.fontName, false);
         },
             
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
 			ccbi.writeString(this.fontName, false, outputFile);
         }
@@ -506,7 +506,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeInt(this.value, outputFile);
         }
@@ -526,14 +526,14 @@ var Property =
         
         cacheStrings: function(ccbi)
         {
-            this._super.cacheStrings(ccbi);
+            this._super(ccbi);
             
             ccbi.addToStringCache(this.selector, false);
         },
             
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
 			ccbi.writeString(this.selector, false, outputFile);
             JSFLBitWriter.writeUInt(this.target, outputFile);
@@ -554,7 +554,7 @@ var Property =
         
         cacheStrings: function(ccbi)
         {
-            this._super.cacheStrings(ccbi);
+            this._super(ccbi);
             
             ccbi.addToStringCache(this.animationFile, true);
             ccbi.addToStringCache(this.animationName, false);
@@ -562,7 +562,7 @@ var Property =
             
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             ccbi.writeString(this.animationFile, true, outputFile);
             ccbi.writeString(this.animationName, false, outputFile);
@@ -581,14 +581,14 @@ var Property =
         
         cacheStrings: function(ccbi)
         {
-            this._super.cacheStrings(ccbi);
+            this._super(ccbi);
             
             ccbi.addToStringCache(this.ccbFile, true);
         },
             
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             ccbi.writeString(this.ccbFile, true, outputFile);
         }
@@ -606,14 +606,14 @@ var Property =
         
         cacheStrings: function(ccbi)
         {
-            this._super.cacheStrings(ccbi);
+            this._super(ccbi);
             
             ccbi.addToStringCache(this.value, false);
         },
             
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             ccbi.writeString(this.value, false, outputFile);
         }
@@ -635,14 +635,14 @@ var Property =
         
         cacheStrings: function(ccbi)
         {
-            this._super.cacheStrings(ccbi);
+            this._super(ccbi);
             
             ccbi.addToStringCache(this.selector, false);
         },
             
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             ccbi.writeString(this.selector, false, outputFile);
             JSFLBitWriter.writeUInt(this.target, outputFile);
@@ -664,7 +664,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeFloat(this.value, outputFile);
             JSFLBitWriter.writeUInt(this.scaleType, outputFile);
@@ -685,7 +685,7 @@ var Property =
         
         serialize: function(ccbi, outputFile)
         {
-            this._super.serialize(ccbi, outputFile);
+            this._super(ccbi, outputFile);
             
             JSFLBitWriter.writeFloat(this.x, outputFile);
             JSFLBitWriter.writeFloat(this.y, outputFile);
