@@ -9,7 +9,7 @@ var Node =
         else
             this.class = class;
             
-        this.sequences = [];
+        this.nodeSequences = [];
         this.regularProperties = [];
         this.extraProperties = [];
         this.children = [];
@@ -19,7 +19,7 @@ var Node =
     jsController: null,
     memberVarAssignmentType: 0,
     memberVarAssignmentName: null,
-    sequences: null,
+    nodeSequences: null,
     regularProperties: null,
     extraProperties: null,
     children: null,
@@ -35,6 +35,11 @@ var Node =
         if(this.memberVarAssignmentType != 0)
         {
             ccbi.addToStringCache(this.memberVarAssignmentName, false);
+        }
+        
+        for(var i = 0; i < this.nodeSequences.length; i++)
+        {
+            this.nodeSequences[i].cacheStrings(ccbi);
         }
         
         for(var i = 0; i < this.regularProperties.length; i++)
@@ -68,8 +73,11 @@ var Node =
             ccbi.writeString(this.memberVarAssignmentName, false, outputFile);
         }
         
-        // TODO: Sequences
-        JSFLBitWriter.writeUInt(0, outputFile);
+        JSFLBitWriter.writeUInt(this.nodeSequences.length, outputFile);
+        for(var i = 0; i < this.nodeSequences.length; i++)
+        {
+            this.nodeSequences[i].serialize(ccbi, outputFile);
+        }
         
         JSFLBitWriter.writeUInt(this.regularProperties.length, outputFile);
         JSFLBitWriter.writeUInt(this.extraProperties.length, outputFile);
