@@ -24,6 +24,35 @@ var Node =
     extraProperties: null,
     children: null,
     
+    cacheStrings: function(ccbi)
+    {
+        ccbi.addToStringCache(this.class, false);
+        if(ccbi.jsControlled)
+        {
+            ccbi.addToStringCache(this.jsController, false);
+        }
+        
+        if(this.memberVarAssignmentType != 0)
+        {
+            ccbi.addToStringCache(this.memberVarAssignmentName, false);
+        }
+        
+        for(var i = 0; i < this.regularProperties.length; i++)
+        {
+            this.regularProperties[i].cacheStrings(ccbi);
+        }
+        
+        for(var i = 0; i < this.extraProperties.length; i++)
+        {
+            this.extraProperties[i].cacheStrings(ccbi);
+        }
+        
+        for(var i = 0; i < this.children.length; i++)
+        {
+            this.children[i].cacheStrings(ccbi);
+        }
+    },
+    
     serialize: function(ccbi, outputFile)
     {
         ccbi.writeString(this.class, false, outputFile);

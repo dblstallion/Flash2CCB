@@ -10,16 +10,24 @@ var CCBI =
         // Reset string cache
         this.stringCache = {};
         this.nextStringId = 0;
+        
         this.rootNode = null;
+        
+        this.sequenceAutoPlay = null;
+        this.sequences = [];
     },
     
+    // Static
     version: 5,
+    
+    // Instance
     jsControlled: null,
     flattenPaths: null,
     stringCache: null,
     nextStringId: null,
-    sequenceAutoPlay: -1,
     rootNode: null,
+    sequenceAutoPlay: null,
+    sequences: null,
     
     writeHeader: function(outputFile)
     {
@@ -70,46 +78,21 @@ var CCBI =
         }
     },
     
-    writeSequences: function(outputFile)
+    findSequenceId: function(sequence)
     {
-        // TODO: Implement this
-        JSFLBitWriter.writeUInt(0, outputFile);
-        
-        JSFLBitWriter.writeInt(this.sequenceAutoPlay, outputFile);
+        return this.sequences.indexOf(sequence);
     },
     
-    addNodeToStringCache: function(node)
+    writeSequences: function(outputFile)
     {
-        if(!node)
+        JSFLBitWriter.writeUInt(this.sequences.length, outputFile);
+        
+        for(var i = 0; i < this.sequences.length; i++)
         {
-            throw new Error("Argument Error: addNodeToStringCache does not accept null node");
+            this.sequences[i].serialize(this, outputFile);
         }
         
-        this.addToStringCache(node.class, false);
-        if(this.jsControlled)
-        {
-            this.addToStringCache(node.jsController, false);
-        }
-        
-        if(node.memberVarAssignmentType != 0)
-        {
-            this.addToStringCache(node.memberVarAssignmentName, false);
-        }
-        
-        for(var i = 0; i < node.regularProperties.length; i++)
-        {
-            node.regularProperties[i].cacheStrings(this);
-        }
-        
-        for(var i = 0; i < node.extraProperties.length; i++)
-        {
-            node.extraProperties[i].cacheStrings(this);
-        }
-        
-        for(var i = 0; i < node.children.length; i++)
-        {
-            this.addNodeToStringCache(node.children[i]);
-        }
+        JSFLBitWriter.writeInt(this.findSequenceId(this.sequenceAutoPlay), outputFile);
     },
 
     writeNodeGraph: function(outputFile)
@@ -132,8 +115,14 @@ var CCBI =
         
         // Populate string cache
         if(this.rootNode)
-            this.addNodeToStringCache(this.rootNode);
+            this.rootNode.cacheStrings(this);
             
+        for(var i = 0; i < this.sequences.length; i++)
+        {
+            this.sequences[i].cacheStrings(this);
+        }
+        
+        // Write file
         var outputPath = URI.toPath(uri, 1);
         
         if(outputPath)
