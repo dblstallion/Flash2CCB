@@ -27,13 +27,10 @@ var Flash2CCB =
         // Create a library packer to store our sprite sheets
         var packer = new LibraryPacker(outputName);
         
-        // Create output CCBI file
-        var ccbi = new CCBI(false, false);
-        
         // Convert the scene
         document = document || fl.getDocumentDOM();
         
-        ccbi.rootNode = CCBConverter.timelineToNode(document.getTimeline(), packer);
+        var ccbi = CCBConverter.timelineToCCBI(document.getTimeline(), packer);
         
         // Output the ccbi
         ccbi.write(outputFolder + outputName + ".ccbi");

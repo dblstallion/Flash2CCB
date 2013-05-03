@@ -600,7 +600,7 @@ var Value =
 	},
 	FloatXY:
 	{
-        init: function(name, x, y)
+        init: function(x, y)
         {
             this.x = x;
             this.y = y;

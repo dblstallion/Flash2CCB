@@ -29,7 +29,7 @@ var Keyframe =
     {
         this.time = time;
         this.value = value;
-        this.easingType = EasingType.Instant;
+        this.easingType = EasingType.Linear;
         this.easingOpt = 0.0;
     },
     
