@@ -100,7 +100,9 @@ var CCBConverter =
 			throw new Error("ccbi files do not support custom ease");
 		
 		var motion = XML(frame.getMotionObjectXML());
-		var sequence = new NodeSequence(parentSequence);
+		
+		if( motion..Keyframe.(@anchor != @next || @anchor != @previous).length() )
+			throw new Error("ccbi files do not support smooth keyframes, use corner keyframes only")
 		
 		var fps = motion.@TimeScale;
 		
@@ -171,6 +173,8 @@ var CCBConverter =
 			transform.Property.(@id == "Scale_X").Keyframe,
 			transform.Property.(@id == "Scale_Y").Keyframe
 		);
+		
+		var sequence = new NodeSequence(parentSequence);
 		
 		sequence.properties.push(position);
 		sequence.properties.push(rotationX);
