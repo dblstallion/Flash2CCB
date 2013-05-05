@@ -3,7 +3,7 @@ xjsfl.init(this, ['Class', 'URI', 'SpriteSheetGroup']);
 // Packs a library into a bunch of sprite sheets
 // Folders containing files are sprite sheets
 // Higher level folders are treated as real folders for the export
-// eg. Folder/Sheet/Bitmap.png
+// eg. rootName/Folder/Sheet/Bitmap.png
 var LibraryPacker =
 {
     init: function(rootName)
@@ -27,7 +27,7 @@ var LibraryPacker =
             this.spriteGroups[spriteSheetFile] = new SpriteSheetGroup(spriteSheetFile);
         }
         
-        this.spriteGroups[spriteSheetFile].addItem(item);
+        return this.spriteGroups[spriteSheetFile].addItem(item);
     },
     
     exportLibrary: function(folderURI)

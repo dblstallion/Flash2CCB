@@ -71,11 +71,13 @@ var SpriteSheetGroup =
                 this.addBitmap(item);
                 break;
             default:
-                return;
+                return false;
         }
         
         // Set the metadata
         item.addData("spriteSheet", "string", this.getSpriteSheetFile(this.spriteSheets.length) + "." + META_FORMAT);
+        
+        return true;
     },
     
     addBitmap: function(bitmap)

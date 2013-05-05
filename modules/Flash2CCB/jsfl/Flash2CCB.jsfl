@@ -37,6 +37,35 @@ var Flash2CCB =
         
         // Output the library
         packer.exportLibrary(outputFolder);
+    },
+    
+    exportLibrary: function(outputFolderURI, library)
+    {
+        if(!outputFolderURI)
+        {
+            throw new Error ("No output folder provided to exportLibrary");
+        }
+        
+        outputFolderURI = URI.toURI(outputFolderURI, 1);
+        
+        if(!URI.isFolder(outputFolderURI))
+        {
+            throw new Error ("exportLibrary output path must be a folder");
+        }
+        
+        library = library || fl.getDocumentDOM().library;
+        
+        var outputFolder = URI.getParent(outputFolderURI);
+        var libraryName = URI.getName(outputFolderURI);
+        
+        var packer = new LibraryPacker(libraryName);
+        
+        for(var i = 0; i < library.items.length; i++)
+        {
+            packer.addItem(library.items[i]);
+        }
+        
+        packer.exportLibrary(outputFolder);
     }
 };
 

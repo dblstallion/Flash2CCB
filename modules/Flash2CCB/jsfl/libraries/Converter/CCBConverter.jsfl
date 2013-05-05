@@ -32,7 +32,7 @@ function anchorValue(xmlKeyframe)
 
 var CCBConverter =
 {
-    timelineToCCBI: function(timeline, libraryPacker)
+    timelineToCCBI: function(timeline)
     {
 		// Set frame to 0, important for motion tweens
 		timeline.currentFrame = 0;
@@ -45,7 +45,7 @@ var CCBConverter =
         
         for(var layerIndex = 0; layerIndex < timeline.layers.length; layerIndex++)
         {
-            var layerNode = CCBConverter.layerToNode(timeline.layers[layerIndex], libraryPacker, ccbi);
+            var layerNode = CCBConverter.layerToNode(timeline.layers[layerIndex], ccbi);
             
             if(layerNode)
                 ccbi.rootNode.children.push(layerNode);
@@ -183,7 +183,7 @@ var CCBConverter =
 		return sequence;
 	},
     
-    layerToNode: function(layer, libraryPacker, ccbi)
+    layerToNode: function(layer, ccbi)
     {
         if(layer.layerType != "normal")
             return null;
@@ -192,7 +192,7 @@ var CCBConverter =
 		if(layer.animationType == "motion object")
 		{
 			var frame = layer.frames[0];
-			var node = CCBConverter.elementToNode(frame.elements[0], libraryPacker);
+			var node = CCBConverter.elementToNode(frame.elements[0]);
 			
 			node.nodeSequences.push(CCBConverter.motionToNodeSequence(frame, ccbi.sequences[0], frame.elements[0]));
 			
@@ -206,7 +206,7 @@ var CCBConverter =
 			
 			for(var elementIndex = 0; elementIndex < frame.elements.length; elementIndex++)
 			{
-				var elementNode = CCBConverter.elementToNode(frame.elements[elementIndex], libraryPacker);
+				var elementNode = CCBConverter.elementToNode(frame.elements[elementIndex]);
 				
 				if(elementNode)
 					node.children.push(elementNode);
@@ -216,7 +216,7 @@ var CCBConverter =
 		}
     },
     
-    elementToNode: function(element, libraryPacker)
+    elementToNode: function(element)
     {
         if(element.elementType != 'instance')
             return null;
@@ -224,7 +224,12 @@ var CCBConverter =
         if(element.instanceType != 'bitmap' && element.instanceType != 'symbol')
             return null;
 		
-		libraryPacker.addItem(element.libraryItem);
+		if(!element.libraryItem.hasData("spriteSheet"))
+		{
+			throw new Error("Element " + element.name + " does not have sprite-sheet data. Please re-export your library.");
+		}
+		
+		var spriteSheet = element.libraryItem.getData("spriteSheet");
 		
 		var spriteName = URI.getName(element.libraryItem.name);
 		if(element.instanceType == 'symbol')
@@ -244,7 +249,7 @@ var CCBConverter =
         node.regularProperties.push(new Property("scale", new Value.ScaleLock(element.scaleX, element.scaleY, Value.ScaleType.Absolute)));
         node.regularProperties.push(new Property("rotationX", new Value.Degrees(element.skewX)));
         node.regularProperties.push(new Property("rotationY", new Value.Degrees(element.skewY)));
-        node.regularProperties.push(new Property("displayFrame", new Value.SpriteFrame(element.libraryItem.getData("spriteSheet"), spriteName)));
+        node.regularProperties.push(new Property("displayFrame", new Value.SpriteFrame(spriteSheet, spriteName)));
 		
 		trace(spriteName + ": " + element.transformX + ", " + (fl.getDocumentDOM().height - element.transformY));
         
